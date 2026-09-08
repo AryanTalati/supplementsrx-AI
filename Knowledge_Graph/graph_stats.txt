@@ -1,0 +1,100 @@
+============================================================
+  SupplementsRx Knowledge Graph — Statistics
+============================================================
+
+Total Nodes : 5,577
+Total Edges : 63,573
+
+NODE BREAKDOWN:
+  Supplements  : 4,082
+  Conditions   : 200
+  Side Effects : 921
+  Drugs        : 647
+  Classes      : 50
+
+EDGE BREAKDOWN:
+  TREATS         : 17,768
+  CAUSES         : 3,216
+  INTERACTS_WITH : 4,538
+  BELONGS_TO     : 1,350
+  SIMILAR_TO     : 36,744
+
+TOP 20 MOST CONNECTED SUPPLEMENTS:
+  Moxibustion                                   degree=293
+  Honey                                         degree=290
+  Melatonin                                     degree=289
+  Ginger                                        degree=284
+  St. John'S Wort                               degree=282
+  Iron                                          degree=280
+  Cupping                                       degree=279
+  Goji                                          degree=277
+  Maritime Pine                                 degree=274
+  Hypnotherapy                                  degree=261
+  Green Tea                                     degree=260
+  Selenium                                      degree=258
+  Fish Oil                                      degree=257
+  Evening Primrose                              degree=256
+  German Chamomile                              degree=252
+  Vitamin C                                     degree=249
+  Magnesium                                     degree=249
+  Fever Bark                                    degree=241
+  Quercetin                                     degree=241
+  Zinc                                          degree=237
+
+TOP 15 CONDITIONS (most supplements treat):
+  Pain & Inflammation                           <- 1110 supplements
+  Digestive Health                              <- 994 supplements
+  Cardiovascular Health                         <- 960 supplements
+  Immune Support                                <- 943 supplements
+  Liver & Detox                                 <- 824 supplements
+  Weight Management                             <- 823 supplements
+  Skin Health                                   <- 812 supplements
+  Cancer Support                                <- 809 supplements
+  Respiratory Health                            <- 747 supplements
+  Blood Sugar Management                        <- 705 supplements
+  Antioxidant & Anti-Aging                      <- 674 supplements
+  Sports & Athletic Performance                 <- 656 supplements
+  Kidney Health                                 <- 563 supplements
+  Anxiety & Stress                              <- 555 supplements
+  Allergy Relief                                <- 518 supplements
+
+TOP 15 SIDE EFFECTS (most common):
+  Nausea                                        <- 217 supplements
+  Vomiting                                      <- 187 supplements
+  Diarrhea                                      <- 173 supplements
+  Constipation                                  <- 106 supplements
+  Headache                                      <- 106 supplements
+  Hypertension                                  <- 86 supplements
+  Dizziness                                     <- 84 supplements
+  Abdominal Pain                                <- 76 supplements
+  Flatulence                                    <- 59 supplements
+  Bloating                                      <- 46 supplements
+  Itching                                       <- 39 supplements
+  Insomnia                                      <- 38 supplements
+  Hypotension                                   <- 38 supplements
+  Fatigue                                       <- 38 supplements
+  Heartburn                                     <- 35 supplements
+
+TOP 10 DRUG INTERACTIONS:
+  Antidiabetes Drugs                            <- 231 supplements
+  Anticoagulant/Antiplatelet Drugs              <- 199 supplements
+  Herbs And Supplements With Hypoglycemic Potential <- 181 supplements
+  Anticoagulant/Antiplatelet Herbs And Supplements <- 166 supplements
+  Cross-Allergenicity                           <- 117 supplements
+  Cytochrome P450 3A4 (Cyp3A4) Substrates       <- 113 supplements
+  Antihypertensive Drugs                        <- 113 supplements
+  Herbs And Supplements With Hypotensive Effects <- 80 supplements
+  Cytochrome P450 1A2 (Cyp1A2) Substrates       <- 79 supplements
+  Cns Depressants                               <- 78 supplements
+
+TOP 10 SUPPLEMENT CLASSES:
+  Immunomodulators                              <- 191 supplements
+  Sedative-Hypnotic Agents                      <- 103 supplements
+  Diuretics                                     <- 90 supplements
+  Immunostimulants                              <- 87 supplements
+  Vasodilators                                  <- 72 supplements
+  Laxatives                                     <- 58 supplements
+  Anticoagulant Agents                          <- 40 supplements
+  Stimulants (Cognitive)                        <- 37 supplements
+  Energy Boosters                               <- 34 supplements
+  Photosensitizers                              <- 31 supplements

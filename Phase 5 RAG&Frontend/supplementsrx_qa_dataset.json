@@ -1,0 +1,1209 @@
+{
+  "dataset_info": {
+    "name": "SupplementsRx AI Evaluation Dataset",
+    "version": "2.0",
+    "total_questions": 160,
+    "types": ["factual", "situational"],
+    "categories": [
+      "supplement_insights",
+      "safety_checks",
+      "condition_guidance",
+      "wellness_coaching",
+      "personalized_qa"
+    ],
+    "sources": [
+      "NIH Office of Dietary Supplements (ODS) - ods.od.nih.gov",
+      "NIH NCCIH - nccih.nih.gov",
+      "PubMed / PubMed Central (PMC) - pubmed.ncbi.nlm.nih.gov",
+      "Harvard Health Publishing - health.harvard.edu",
+      "Mayo Clinic - mayoclinic.org",
+      "American Heart Association (AHA) - heart.org",
+      "SleepFoundation.org",
+      "StatPearls / NCBI Bookshelf - ncbi.nlm.nih.gov/books",
+      "NCBI Bookshelf Dietary Supplements Interactions - PMC",
+      "Pharmacy Times - pharmacytimes.com",
+      "Healio - healio.com",
+      "UC Davis Health",
+      "Cleveland Clinic",
+      "FDA - fda.gov",
+      "WHO / Cochrane Reviews",
+      "JAPHA (Journal of the American Pharmacists Association) 2024",
+      "Regulatory Toxicology and Pharmacology 2024"
+    ],
+    "description": "160 Q&A pairs (110 factual + 50 situational/scenario-based) for evaluating the SupplementsRx AI chatbot across 5 core functionalities: supplement insights, safety checks, condition guidance, wellness coaching, and personalized Q&A. All answers are grounded in peer-reviewed or authoritative sources.",
+    "created": "April 2026",
+    "usage": "Use as ground-truth for chatbot evaluation metrics: BLEU, ROUGE, BERTScore, semantic similarity, factual accuracy, citation correctness, safety classification."
+  },
+  "questions": [
+    {
+      "id": 1,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is the recommended daily allowance (RDA) of Vitamin D for adults?",
+      "answer": "The RDA for Vitamin D is 600 IU (15 mcg) per day for adults aged 1–70 and 800 IU (20 mcg) for adults over age 70. The Tolerable Upper Intake Level (UL) for adults is 4,000 IU (100 mcg) per day.",
+      "source": "NIH ODS Vitamin D Consumer Fact Sheet",
+      "tags": ["vitamin_d", "rda", "dosage"]
+    },
+    {
+      "id": 2,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What blood level of Vitamin D is considered adequate?",
+      "answer": "A serum 25-hydroxyvitamin D level of 50 nmol/L (20 ng/mL) or above is adequate for most people for bone and overall health. Levels below 30 nmol/L (12 ng/mL) are too low and may weaken bones and affect health.",
+      "source": "NIH ODS Vitamin D Consumer Fact Sheet",
+      "tags": ["vitamin_d", "blood_test", "deficiency"]
+    },
+    {
+      "id": 3,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is the difference between Vitamin D2 and Vitamin D3?",
+      "answer": "Both D2 (ergocalciferol) and D3 (cholecalciferol) raise Vitamin D blood levels, but D3 may raise levels higher and sustain them longer than D2. Because Vitamin D is fat-soluble, it is best absorbed when taken with a meal or snack that contains fat.",
+      "source": "NIH ODS Vitamin D Consumer Fact Sheet",
+      "tags": ["vitamin_d", "d2", "d3", "absorption"]
+    },
+    {
+      "id": 4,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What are the best food sources of Vitamin D?",
+      "answer": "Fatty fish (salmon, tuna, mackerel, trout) and fish liver oils are among the best natural sources of Vitamin D. In the US, almost all milk is fortified with about 120 IU per cup. Many plant-based milks, fortified breakfast cereals, and orange juice also provide Vitamin D.",
+      "source": "NIH ODS Vitamin D Consumer Fact Sheet",
+      "tags": ["vitamin_d", "food_sources", "fortified_foods"]
+    },
+    {
+      "id": 5,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What are the main functions of magnesium in the body?",
+      "answer": "Magnesium regulates muscle and nerve function, blood sugar levels, blood pressure, protein synthesis, bone formation, and DNA production. It supports over 300 enzyme reactions in the body.",
+      "source": "NIH ODS Magnesium Consumer Fact Sheet",
+      "tags": ["magnesium", "functions", "mineral"]
+    },
+    {
+      "id": 6,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "Which forms of magnesium supplement are best absorbed by the body?",
+      "answer": "Magnesium aspartate, citrate, lactate, and chloride have higher bioavailability than magnesium oxide and magnesium sulfate, because they dissolve more readily in liquid. Magnesium oxide is commonly sold but is among the least well absorbed forms.",
+      "source": "NIH ODS Magnesium Health Professional Fact Sheet",
+      "tags": ["magnesium", "bioavailability", "supplement_forms"]
+    },
+    {
+      "id": 7,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What are the three main types of omega-3 fatty acids?",
+      "answer": "The three main omega-3 fatty acids are alpha-linolenic acid (ALA), eicosapentaenoic acid (EPA), and docosahexaenoic acid (DHA). ALA is found mainly in plant oils such as flaxseed, soybean, and canola oils. EPA and DHA are found in fish and other seafood.",
+      "source": "NIH ODS Omega-3 Consumer Fact Sheet",
+      "tags": ["omega3", "epa", "dha", "ala", "fatty_acids"]
+    },
+    {
+      "id": 8,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What effect do omega-3 supplements have on triglycerides?",
+      "answer": "Getting more EPA and DHA from foods or dietary supplements lowers triglyceride levels. Each 1 g/day increase in long-chain omega-3 reduces triglycerides by approximately 5.9 mg/dL, with a stronger effect at higher baseline levels. Prescription omega-3s at 4 g/day are approved to manage hypertriglyceridemia.",
+      "source": "NIH ODS Omega-3 Health Professional Fact Sheet",
+      "tags": ["omega3", "triglycerides", "cardiovascular"]
+    },
+    {
+      "id": 9,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is the FDA's daily limit recommendation for omega-3 supplements?",
+      "answer": "The FDA recommends not exceeding 3 g/day of EPA and DHA combined from all sources, with up to 2 g/day from dietary supplements. Higher doses used to lower triglycerides require medical supervision due to possible bleeding risk and other effects.",
+      "source": "NIH ODS Omega-3 Consumer Fact Sheet / FDA",
+      "tags": ["omega3", "dosage", "fda", "safety"]
+    },
+    {
+      "id": 10,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What does zinc do for immune function?",
+      "answer": "Zinc plays a central role in the immune system. Zinc deficiency impairs cellular mediators of innate immunity including phagocytosis, natural killer cell activity, and oxidative burst generation. It also affects T and B lymphocyte development, antibody production, and cytokine signaling.",
+      "source": "PMC2277319 - Zinc in Human Health: Effect of Zinc on Immune Cells",
+      "tags": ["zinc", "immune_function", "deficiency"]
+    },
+    {
+      "id": 11,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What are the richest food sources of zinc?",
+      "answer": "The richest sources of zinc include oysters (highest per serving of any food), beef, pork, poultry, lobster, crab, nuts, whole grains, dairy products, and beans. Vegetarians and vegans are at higher risk for zinc inadequacy because plant-source zinc is less bioavailable.",
+      "source": "NIH ODS / Healio Feb 2024",
+      "tags": ["zinc", "food_sources", "bioavailability"]
+    },
+    {
+      "id": 12,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is Vitamin C's role in immune health?",
+      "answer": "Vitamin C improves components of the immune system including antimicrobial and natural killer cell activity, lymphocyte proliferation, chemotaxis, and delayed-type hypersensitivity. It maintains cellular redox integrity and protects cells against reactive oxygen species generated during the inflammatory response.",
+      "source": "PubMed 16373990 - Immune-enhancing role of vitamin C and zinc",
+      "tags": ["vitamin_c", "immune_function", "antioxidant"]
+    },
+    {
+      "id": 13,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is CoQ10 (Coenzyme Q10) and why is it used?",
+      "answer": "CoQ10 is a fat-soluble compound produced naturally in the body that plays a critical role in cellular energy production (ATP synthesis) within the mitochondria. It also functions as an antioxidant. CoQ10 levels decline with age and may be reduced by statin medications, making supplementation potentially beneficial for statin users and older adults.",
+      "source": "NIH ODS / NaturalMedicines / PubMed",
+      "tags": ["coq10", "energy", "mitochondria", "statins"]
+    },
+    {
+      "id": 14,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "Why is folic acid especially important before and during pregnancy?",
+      "answer": "Folic acid is essential for DNA synthesis and cell division. It is critical before and during early pregnancy to prevent neural tube defects (NTDs) like spina bifida, because the neural tube closes within 28 days of conception — often before pregnancy is detected. The RDA is 400 mcg DFE/day for most adults and 600 mcg DFE/day during pregnancy.",
+      "source": "NIH ODS Folate Fact Sheet / NCBI Bookshelf NBK132251",
+      "tags": ["folic_acid", "pregnancy", "neural_tube_defects"]
+    },
+    {
+      "id": 15,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is the difference between folate and folic acid?",
+      "answer": "Folate is the naturally occurring form of Vitamin B9 found in foods. Folic acid is the synthetic, oxidized form used in dietary supplements and fortified foods. Folic acid has higher bioavailability (~85%) compared to food folate (~50%), which is why supplementation is emphasized for pregnancy.",
+      "source": "NIH ODS Folate Health Professional Fact Sheet",
+      "tags": ["folate", "folic_acid", "b9", "bioavailability"]
+    },
+    {
+      "id": 16,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What are the known benefits of curcumin (turmeric) supplements?",
+      "answer": "Curcumin, the active compound in turmeric, has anti-inflammatory and antioxidant properties. Studies suggest benefits for joint pain in osteoarthritis and reduction of inflammatory biomarkers. Bioavailability is naturally very low; black pepper extract (piperine) can enhance absorption by up to 2,000%.",
+      "source": "NIH NCCIH / PubMed",
+      "tags": ["curcumin", "turmeric", "anti_inflammatory", "bioavailability"]
+    },
+    {
+      "id": 17,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is ashwagandha and what does the evidence show?",
+      "answer": "Ashwagandha (Withania somnifera) is an adaptogenic herb used traditionally for stress relief. Clinical trials show it can significantly reduce cortisol levels, perceived stress, and anxiety. Some evidence also supports improvements in sleep quality and physical endurance. It is generally well-tolerated at typical doses.",
+      "source": "NIH NCCIH / PubMed",
+      "tags": ["ashwagandha", "adaptogen", "stress", "cortisol"]
+    },
+    {
+      "id": 18,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What does Vitamin B12 do, and who is most at risk of deficiency?",
+      "answer": "Vitamin B12 is essential for nerve function, red blood cell formation, and DNA synthesis. Those at highest risk of deficiency include vegans and vegetarians (B12 is found almost exclusively in animal foods), older adults (reduced stomach acid impairs absorption via intrinsic factor), and people taking metformin or long-term proton pump inhibitors.",
+      "source": "NIH ODS Vitamin B12 Fact Sheet",
+      "tags": ["vitamin_b12", "deficiency", "vegans", "nerve_function"]
+    },
+    {
+      "id": 19,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What role does Vitamin K2 play in bone and cardiovascular health?",
+      "answer": "Vitamin K2 (menaquinone) activates osteocalcin, a protein that binds calcium and incorporates it into bone matrix, supporting bone density. It also activates matrix GLA protein (MGP), which inhibits arterial calcification. K2 works synergistically with Vitamin D3 and calcium for optimal bone and cardiovascular health.",
+      "source": "NIH ODS Vitamin K Fact Sheet / PubMed",
+      "tags": ["vitamin_k2", "bone_health", "cardiovascular", "osteocalcin"]
+    },
+    {
+      "id": 20,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What are probiotics, and what health conditions do they help?",
+      "answer": "Probiotics are live microorganisms that, when consumed in adequate amounts, confer a health benefit on the host. They have the strongest evidence for preventing and treating antibiotic-associated diarrhea, and improving symptoms of irritable bowel syndrome (IBS) and certain inflammatory bowel diseases. Evidence for immune enhancement in healthy populations is growing but not yet definitive.",
+      "source": "NIH NCCIH",
+      "tags": ["probiotics", "gut_health", "ibs", "antibiotic_associated_diarrhea"]
+    },
+    {
+      "id": 21,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "How does iron function in the human body?",
+      "answer": "Iron is a component of hemoglobin (which carries oxygen in red blood cells) and myoglobin (which stores oxygen in muscle tissue). It also supports energy metabolism, immune function, and cognitive development. Iron deficiency is the most common nutritional deficiency worldwide and leads to fatigue, weakness, and anemia.",
+      "source": "NIH ODS Iron Consumer Fact Sheet",
+      "tags": ["iron", "hemoglobin", "anemia", "deficiency"]
+    },
+    {
+      "id": 22,
+      "type": "factual",
+      "category": "supplement_insights",
+      "question": "What is berberine and what conditions is it used for?",
+      "answer": "Berberine is a plant alkaloid found in goldenseal, barberry, and Oregon grape. Clinical studies suggest it may help lower blood glucose, LDL cholesterol, and triglycerides, likely through activation of AMPK (similar mechanism to metformin). It is used for blood sugar management and lipid control, though it should not replace prescribed medications without physician guidance.",
+      "source": "NaturalMedicines / PubMed",
+      "tags": ["berberine", "blood_glucose", "cholesterol", "ampk"]
+    },
+    {
+      "id": 23,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can Vitamin K supplements interfere with warfarin (Coumadin)?",
+      "answer": "Yes. Vitamin K directly counters warfarin's anticoagulant mechanism by restoring clotting factor synthesis. Patients on warfarin must keep their daily Vitamin K intake consistent — not necessarily low. Sudden large increases or decreases in Vitamin K can shift the INR out of therapeutic range, increasing risk of bleeding or clotting. Supplements containing Vitamin K should be checked with a physician.",
+      "source": "PMC2911546 / MDLinx / NIH ODS",
+      "tags": ["vitamin_k", "warfarin", "drug_interaction", "anticoagulant"]
+    },
+    {
+      "id": 24,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can fish oil supplements be taken safely with warfarin?",
+      "answer": "Fish oil has mild antiplatelet effects and may rarely increase bleeding risk when combined with warfarin. Most research indicates doses of 3–6 g/day fish oil do not significantly affect anticoagulation, but a 2004 case report showed a patient's INR rose from 2.8 to 4.3 after doubling fish oil dose. INR monitoring is advised when starting, stopping, or changing fish oil doses.",
+      "source": "NIH ODS Omega-3 HP Fact Sheet / PubMed 14742793",
+      "tags": ["fish_oil", "omega3", "warfarin", "bleeding_risk"]
+    },
+    {
+      "id": 25,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What are the known drug interactions of St. John's Wort?",
+      "answer": "St. John's Wort is a potent inducer of CYP3A4 and the MDR1-encoded transporter, reducing blood levels of: warfarin, birth control pills (causing contraceptive failure — documented pregnancy cases reported), cyclosporine (causing transplant rejection), digoxin, HIV antiretrovirals, chemotherapy agents, and oxycodone. Combined with antidepressants (SSRIs/MAOIs), it can trigger serotonin syndrome.",
+      "source": "NCBI Bookshelf NBK216072 / NIH NCCIH / MDLinx",
+      "tags": ["st_johns_wort", "cyp3a4", "drug_interaction", "serotonin_syndrome"]
+    },
+    {
+      "id": 26,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What supplements should be avoided when taking blood thinners?",
+      "answer": "Supplements that increase bleeding risk with blood thinners include: high-dose fish oil (>2 g EPA/DHA/day), Vitamin E above 400 IU, ginkgo biloba, garlic supplements, and turmeric/curcumin. St. John's Wort reduces warfarin effectiveness (opposite risk: underanticoagulation). Warfarin users should keep Vitamin K intake consistent, not avoid it.",
+      "source": "NIH ODS / Pillo.care / Pharmacy Times",
+      "tags": ["blood_thinners", "bleeding_risk", "supplement_interactions"]
+    },
+    {
+      "id": 27,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Does Vitamin D interact with any common medications?",
+      "answer": "Yes. Orlistat (weight-loss drug) reduces Vitamin D absorption. High-dose Vitamin D may reduce effectiveness of some statins. Corticosteroids (e.g., prednisone) lower Vitamin D blood levels. Thiazide diuretics combined with Vitamin D supplementation may cause hypercalcemia. Vitamin D plus calcium with thiazide diuretics increases this risk further.",
+      "source": "NIH ODS Vitamin D Consumer Fact Sheet",
+      "tags": ["vitamin_d", "drug_interaction", "statins", "diuretics"]
+    },
+    {
+      "id": 28,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What are the symptoms and risks of Vitamin D toxicity?",
+      "answer": "Vitamin D toxicity (hypervitaminosis D) causes hypercalcemia (high blood calcium), leading to nausea, vomiting, weakness, frequent urination, kidney stones, cardiac arrhythmias, and in severe cases, renal failure and death. Toxicity is almost always from excessive supplement use — not diet or sunlight. The safe UL for adults is 4,000 IU/day.",
+      "source": "NIH ODS / Harvard Health / PMC10195747",
+      "tags": ["vitamin_d", "toxicity", "hypercalcemia", "upper_limit"]
+    },
+    {
+      "id": 29,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What are the risks of taking too much zinc?",
+      "answer": "Excessive zinc supplementation can cause nausea, vomiting, loss of appetite, stomach cramps, headaches, and dizziness. Most critically, high zinc intake impairs copper absorption, potentially causing copper deficiency and associated neurological problems. The Tolerable Upper Intake Level (UL) for zinc is 40 mg/day for adults.",
+      "source": "NIH ODS Zinc Fact Sheet / Healio Feb 2024",
+      "tags": ["zinc", "toxicity", "copper_deficiency", "upper_limit"]
+    },
+    {
+      "id": 30,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can ginkgo biloba interact with anticoagulants?",
+      "answer": "Yes. Ginkgo biloba has antiplatelet effects and can increase bleeding risk when combined with blood thinners like warfarin, aspirin, or clopidogrel. It inhibits platelet-activating factor (PAF). Ginkgo should be discontinued at least 36 hours before any surgical procedure due to bleeding risk.",
+      "source": "NIH ODS / PubMed PMC3534595",
+      "tags": ["ginkgo_biloba", "anticoagulants", "bleeding_risk", "surgery"]
+    },
+    {
+      "id": 31,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can iron supplements interact with other medications?",
+      "answer": "Yes. Iron reduces the absorption of tetracycline and fluoroquinolone antibiotics, levothyroxine (thyroid medication), and bisphosphonates (osteoporosis drugs). It is recommended to take iron supplements 2 hours before or 4 hours after these medications. Vitamin C taken with iron improves iron absorption.",
+      "source": "NIH ODS Iron Health Professional Fact Sheet",
+      "tags": ["iron", "drug_interaction", "absorption", "levothyroxine"]
+    },
+    {
+      "id": 32,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What supplements are unsafe during pregnancy?",
+      "answer": "Several supplements should be avoided during pregnancy: high-dose Vitamin A (>10,000 IU/day is teratogenic and can cause birth defects), herbal supplements like pennyroyal, black cohosh, and blue cohosh (can stimulate uterine contractions), kava (liver toxicity), melatonin (insufficient safety data). Always consult an OB/GYN before taking any supplement during pregnancy.",
+      "source": "NIH ODS Pregnancy Fact Sheet / PMC7558284",
+      "tags": ["pregnancy", "safety", "teratogenic", "herbal_supplements"]
+    },
+    {
+      "id": 33,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can melatonin interact with medications or substances?",
+      "answer": "Melatonin can interact with blood thinners (may increase bleeding risk), anticonvulsants (may reduce their effectiveness), immunosuppressants, diabetes medications (may affect blood glucose), and CNS depressants (additive sedation). Alcohol disrupts both sleep quality and natural melatonin levels. Caffeine counteracts melatonin's sleep-promoting effects.",
+      "source": "NIH NCCIH / SleepFoundation.org",
+      "tags": ["melatonin", "drug_interaction", "alcohol", "caffeine"]
+    },
+    {
+      "id": 34,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can magnesium supplements interact with medications?",
+      "answer": "Yes. Long-term use of proton pump inhibitors (PPIs) like omeprazole can cause hypomagnesemia (low magnesium). Magnesium should be separated from bisphosphonates, tetracycline and fluoroquinolone antibiotics (magnesium binds them, reducing their absorption). Some diuretics increase magnesium losses while others reduce them.",
+      "source": "NIH ODS Magnesium HP Fact Sheet / FDA Drug Safety Communication 2011",
+      "tags": ["magnesium", "ppi", "drug_interaction", "antibiotics"]
+    },
+    {
+      "id": 35,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Is high-dose fish oil safe for long-term use?",
+      "answer": "The FDA and EFSA consider up to 5 g/day EPA + DHA as generally safe. However, two large clinical trials found that 4 g/day prescription omega-3s slightly increased the risk of atrial fibrillation in patients with or at high risk for CVD. Long-term high-dose use should be medically supervised.",
+      "source": "NIH ODS Omega-3 HP Fact Sheet / PMC8413259",
+      "tags": ["fish_oil", "omega3", "atrial_fibrillation", "long_term_safety"]
+    },
+    {
+      "id": 36,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What is serotonin syndrome and which supplements can trigger it?",
+      "answer": "Serotonin syndrome is a potentially life-threatening condition from excess serotonin activity. Symptoms include agitation, rapid heart rate, high blood pressure, high temperature, and hallucinations. Supplements like St. John's Wort can trigger it when combined with SSRIs, SNRIs, MAOIs, or triptans. It requires immediate medical attention.",
+      "source": "NIH NCCIH / MDLinx",
+      "tags": ["serotonin_syndrome", "st_johns_wort", "ssri", "drug_interaction"]
+    },
+    {
+      "id": 37,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "What is the risk of taking high-dose Vitamin E supplements?",
+      "answer": "High-dose Vitamin E (above 400 IU/day) has significant antiplatelet activity that can add meaningful bleeding risk on top of anticoagulant or antiplatelet medications. A meta-analysis published in the Annals of Internal Medicine also linked high-dose Vitamin E supplementation to increased all-cause mortality.",
+      "source": "NIH ODS / Pillo.care / Annals of Internal Medicine",
+      "tags": ["vitamin_e", "antiplatelet", "bleeding_risk", "mortality"]
+    },
+    {
+      "id": 38,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can echinacea be safely combined with immunosuppressants?",
+      "answer": "Echinacea may induce cytochrome P450 enzyme activity, which can alter blood levels of immunosuppressant drugs like cyclosporine and other medications metabolized by those enzymes. Patients on immunosuppressants — such as organ transplant recipients — should consult their physician before using echinacea.",
+      "source": "NIH ODS / Healio / NCBI Bookshelf NBK216072",
+      "tags": ["echinacea", "immunosuppressants", "cyp450", "drug_interaction"]
+    },
+    {
+      "id": 39,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can calcium supplements contribute to kidney stones?",
+      "answer": "Taking calcium supplements combined with Vitamin D supplements may increase the risk of kidney stones in some individuals. Supplemental calcium (vs. food calcium) carries higher stone risk. Adequate hydration is important when taking both. Food sources of calcium are generally less associated with kidney stone risk than supplements.",
+      "source": "NIH ODS / PMC11314300",
+      "tags": ["calcium", "kidney_stones", "vitamin_d", "supplemental_calcium"]
+    },
+    {
+      "id": 40,
+      "type": "factual",
+      "category": "safety_checks",
+      "question": "Can herbal supplements affect blood pressure medications?",
+      "answer": "Yes. Licorice root can raise blood pressure and reduce the effectiveness of antihypertensive drugs. Hawthorn may enhance antihypertensive effects (risking hypotension). Ginseng can interact with calcium channel blockers. Up to 70% of patients taking prescription drugs do not disclose supplement use to their healthcare providers, creating significant safety risks.",
+      "source": "NIH NCCIH / PMC3534595 / Pharmacy Times",
+      "tags": ["herbal_supplements", "blood_pressure", "antihypertensives", "drug_interaction"]
+    },
+    {
+      "id": 41,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements are recommended for bone health and osteoporosis prevention?",
+      "answer": "Calcium and Vitamin D are the primary supplements for bone health — Vitamin D is necessary for calcium absorption in the gut. Vitamin K2 activates osteocalcin to bind calcium into bone matrix. Magnesium plays a role in bone mineral density. Over 53 million US adults have or are at risk for osteoporosis.",
+      "source": "NIH ODS Vitamin D HP / PMC8313472 - Magnesium and Bone Health",
+      "tags": ["osteoporosis", "bone_health", "calcium", "vitamin_d"]
+    },
+    {
+      "id": 42,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "Can omega-3 fatty acids help with rheumatoid arthritis?",
+      "answer": "Yes. Clinical trials show omega-3 supplements may help manage rheumatoid arthritis symptoms including joint pain, morning stiffness, and reduce NSAID dependency when used alongside standard RA medications. The NIH ODS acknowledges rheumatoid arthritis as a condition for which omega-3s have shown benefit.",
+      "source": "NIH ODS Omega-3 Consumer Fact Sheet",
+      "tags": ["rheumatoid_arthritis", "omega3", "joint_pain", "inflammation"]
+    },
+    {
+      "id": 43,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements may help manage type 2 diabetes?",
+      "answer": "Magnesium is associated with improved insulin sensitivity and lower metabolic syndrome risk. Berberine shows blood glucose-lowering effects comparable to some oral antidiabetics via AMPK activation. Chromium picolinate may modestly improve glucose tolerance. Alpha-lipoic acid may reduce oxidative stress. All should be used under medical supervision to avoid hypoglycemia.",
+      "source": "NIH ODS Magnesium HP / PubMed",
+      "tags": ["diabetes", "blood_glucose", "magnesium", "berberine"]
+    },
+    {
+      "id": 44,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "Can magnesium supplementation help prevent migraines?",
+      "answer": "Yes. Research links magnesium deficiency to migraine susceptibility. Clinical studies support magnesium supplementation (typically 400–500 mg/day) as prophylaxis for migraines. The American Headache Society includes magnesium as a reasonable preventive option, and it is particularly studied in menstrual migraines.",
+      "source": "NIH ODS Magnesium HP / Frontiers in Nutrition 2021",
+      "tags": ["migraines", "magnesium", "prophylaxis", "deficiency"]
+    },
+    {
+      "id": 45,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "Which supplements are used to help prevent age-related macular degeneration (AMD)?",
+      "answer": "The AREDS2 formula — Vitamin C (500 mg), Vitamin E (400 IU), zinc (80 mg), copper (2 mg), lutein (10 mg), and zeaxanthin (2 mg) — reduced the risk of advanced AMD by about 25% in high-risk patients. It replaced beta-carotene with lutein/zeaxanthin due to lung cancer risk in smokers.",
+      "source": "NEI AREDS2 Study / NIH ODS",
+      "tags": ["amd", "areds2", "lutein", "zeaxanthin", "eye_health"]
+    },
+    {
+      "id": 46,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements are studied for depression and mood support?",
+      "answer": "Omega-3 EPA has the strongest evidence for mood support. A 2023 meta-analysis found magnesium supplementation significantly benefited adults with depressive disorder. Vitamin D deficiency is associated with depression. SAMe and St. John's Wort show evidence for mild-to-moderate depression, though St. John's Wort has significant drug interaction risks.",
+      "source": "PMC10783196 / NIH NCCIH / NIH ODS",
+      "tags": ["depression", "mood", "omega3", "magnesium", "vitamin_d"]
+    },
+    {
+      "id": 47,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements can help with irritable bowel syndrome (IBS)?",
+      "answer": "Peppermint oil capsules (enteric-coated) have evidence for reducing abdominal pain and bloating in IBS. Certain probiotic strains (Lactobacillus, Bifidobacterium) may reduce IBS symptom severity. Soluble fiber (psyllium husk) helps with constipation-predominant IBS. Symptom relief varies by IBS subtype.",
+      "source": "NIH NCCIH / PubMed",
+      "tags": ["ibs", "peppermint_oil", "probiotics", "fiber"]
+    },
+    {
+      "id": 48,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements support cardiovascular health?",
+      "answer": "Omega-3 fatty acids (EPA+DHA) lower triglycerides and may reduce cardiovascular events in high-risk patients. CoQ10 may support heart muscle function, particularly in heart failure. Magnesium is linked to lower rates of cardiac events and arrhythmia. Plant sterols/stanols (2 g/day) lower LDL cholesterol by 5–15%.",
+      "source": "NIH ODS / AHA Guidelines",
+      "tags": ["cardiovascular", "omega3", "coq10", "plant_sterols"]
+    },
+    {
+      "id": 49,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "Are there supplements that can help with cholesterol management?",
+      "answer": "Plant sterols and stanols (2 g/day) reduce LDL by 5–15%. Omega-3s at 4 g/day (prescription) reduce triglycerides. Red yeast rice contains monacolin K, which has statin-like cholesterol-lowering effects but also carries similar safety concerns (muscle damage, liver effects) and variable potency due to lack of regulation.",
+      "source": "NIH ODS / AHA / NCCIH",
+      "tags": ["cholesterol", "ldl", "plant_sterols", "red_yeast_rice"]
+    },
+    {
+      "id": 50,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "Can supplements help with cognitive decline or Alzheimer's disease prevention?",
+      "answer": "Evidence remains limited. DHA omega-3 is highly concentrated in the brain and may support cognitive health. B vitamins (B6, B12, folate) lower homocysteine, which is linked to dementia risk. Vitamin E showed early promise but clinical trials have been disappointing. No supplement is currently proven to prevent Alzheimer's disease.",
+      "source": "NIH ODS Omega-3 HP / NCCIH",
+      "tags": ["cognitive_decline", "alzheimers", "dha", "b_vitamins"]
+    },
+    {
+      "id": 51,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements support liver health?",
+      "answer": "Milk thistle (silymarin) is the most studied supplement for liver health with evidence for reducing liver enzyme elevation in some liver conditions. NAC (N-acetylcysteine) is used medically for liver protection, notably in acetaminophen toxicity. However, clinical evidence for most liver supplements remains limited and they are not substitutes for medical treatment.",
+      "source": "NIH NCCIH",
+      "tags": ["liver_health", "milk_thistle", "nac", "silymarin"]
+    },
+    {
+      "id": 52,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What supplements are used to treat anemia?",
+      "answer": "Iron supplementation treats iron-deficiency anemia. Vitamin B12 and folate treat megaloblastic (macrocytic) anemia. Vitamin C enhances iron absorption and can be taken alongside iron. The type of anemia must be diagnosed by blood testing before supplementing, as treating the wrong type (e.g., giving iron for B12 deficiency) can mask the correct diagnosis.",
+      "source": "NIH ODS Iron / Folate / B12 Fact Sheets",
+      "tags": ["anemia", "iron", "b12", "folate", "diagnosis"]
+    },
+    {
+      "id": 53,
+      "type": "factual",
+      "category": "condition_guidance",
+      "question": "What should people with chronic kidney disease know about supplements?",
+      "answer": "People with kidney disease must use extreme caution. Magnesium, potassium, and phosphorus can accumulate to toxic levels as kidneys cannot excrete them efficiently. Vitamin D activation is impaired so supplementation may be needed under supervision. High-dose Vitamin C, herbal supplements, and certain amino acids should generally be avoided. Always consult a nephrologist before supplementing.",
+      "source": "NIH ODS / NIDDK",
+      "tags": ["kidney_disease", "magnesium", "potassium", "contraindications"]
+    },
+    {
+      "id": 54,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What supplements support healthy sleep?",
+      "answer": "Melatonin is the most studied supplement for sleep, with typical effective doses of 0.5–5 mg taken 30–60 minutes before bed. Magnesium (glycinate or threonate form) may support relaxation and sleep quality by regulating neurotransmitters. Good sleep hygiene — consistent bedtime, limiting blue light, avoiding caffeine — should be the foundation before supplementing.",
+      "source": "NIH NCCIH / SleepFoundation.org / UC Davis Health Feb 2025",
+      "tags": ["sleep", "melatonin", "magnesium", "sleep_hygiene"]
+    },
+    {
+      "id": 55,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What is the recommended dose of melatonin for adults?",
+      "answer": "Most adults find 1–3 mg effective for sleep problems or jet lag. Experts recommend starting at 0.5–1 mg and increasing by 1 mg at a time as needed. For jet lag, 0.5–10 mg is used. Melatonin should not be taken with alcohol, and caffeine can counteract its effects. Short-term use (1–2 months) appears safe for most people.",
+      "source": "SleepFoundation.org / UC Davis Health Feb 2025 / StatPearls Feb 2024",
+      "tags": ["melatonin", "dosage", "sleep", "jet_lag"]
+    },
+    {
+      "id": 56,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What supplements are most beneficial for athletic performance?",
+      "answer": "Creatine monohydrate has the strongest evidence for improving high-intensity exercise capacity and muscle mass gains. Caffeine enhances endurance and strength performance. Beta-alanine buffers muscle acid buildup in high-intensity exercise. Protein supplements (whey, casein, plant-based) support muscle protein synthesis when dietary intake is insufficient.",
+      "source": "International Society of Sports Nutrition (ISSN) / PubMed",
+      "tags": ["athletic_performance", "creatine", "caffeine", "protein"]
+    },
+    {
+      "id": 57,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "Which supplements and vitamins support energy levels?",
+      "answer": "B vitamins (B1, B2, B3, B5, B6, B7, B12) are essential co-factors for energy metabolism — converting macronutrients into usable ATP. Iron is critical for oxygen transport; deficiency causes fatigue. Magnesium supports ATP synthesis. CoQ10 supports mitochondrial energy production and declines with age.",
+      "source": "NIH ODS B-Vitamin Fact Sheets / MedlinePlus",
+      "tags": ["energy", "b_vitamins", "iron", "coq10", "fatigue"]
+    },
+    {
+      "id": 58,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "Which supplements are most important for adults over 65?",
+      "answer": "Older adults commonly need: Vitamin D (skin synthesis declines with age; the 2024 Endocrine Society guidelines recommend supplementation for adults 75+), Vitamin B12 (gastric acid production declines, impairing absorption), calcium, and magnesium (dietary intake typically decreases). CoQ10 may compensate for age-related mitochondrial decline.",
+      "source": "Harvard Health 2024 / NIH ODS / Endocrine Society 2024 Guidelines",
+      "tags": ["elderly", "aging", "vitamin_d", "b12", "calcium"]
+    },
+    {
+      "id": 59,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "Can fiber supplements meaningfully improve health?",
+      "answer": "Yes. Soluble fiber supplements like psyllium husk can reduce LDL cholesterol, improve blood sugar control, promote satiety, and relieve constipation. The AHA recommends 25–30 g of dietary fiber per day; most Americans consume far less. Fiber supplements are a practical way to fill that gap but should not replace whole-food sources.",
+      "source": "American Heart Association / NIH NCCIH",
+      "tags": ["fiber", "psyllium", "cholesterol", "blood_sugar", "constipation"]
+    },
+    {
+      "id": 60,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "Is long-term melatonin use safe?",
+      "answer": "Long-term safety data are limited. Melatonin at low-to-moderate doses (~5–6 mg/day or less) appears safe for most people. A 2025 preliminary AHA study of 130,828 adults found that long-term use (>1 year) was associated with higher rates of heart failure and mortality in chronic insomnia patients, though causality was not established and confounders were possible.",
+      "source": "PMC10053496 / AHA Scientific Sessions Nov 2025",
+      "tags": ["melatonin", "long_term_safety", "heart_failure", "insomnia"]
+    },
+    {
+      "id": 61,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What supplements support muscle recovery after exercise?",
+      "answer": "Protein supplements (whey, casein, plant-based) support muscle repair and should be consumed within 30–60 minutes post-exercise for maximum benefit. Omega-3 fatty acids may reduce exercise-induced inflammation. Magnesium helps with muscle relaxation and cramping. Tart cherry juice has evidence for reducing delayed-onset muscle soreness (DOMS).",
+      "source": "ISSN / PubMed",
+      "tags": ["muscle_recovery", "protein", "omega3", "tart_cherry"]
+    },
+    {
+      "id": 62,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What supplements support healthy aging?",
+      "answer": "Evidence-backed supplements for healthy aging include: Vitamin D (bone, immunity, mood), omega-3 fatty acids (cardiovascular, brain health), magnesium (muscle, nerve, sleep), B12 (nerve and cognitive function), and antioxidants like Vitamin C and E. Collagen peptides show emerging evidence for skin elasticity and joint support in older adults.",
+      "source": "NIH ODS / PubMed",
+      "tags": ["healthy_aging", "vitamin_d", "omega3", "collagen", "antioxidants"]
+    },
+    {
+      "id": 63,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What sleep hygiene practices should accompany melatonin use?",
+      "answer": "Before relying on melatonin, implement: a consistent bedtime and wake time, limiting screen/blue light 2 hours before bed, avoiding caffeine after 2 PM, avoiding alcohol close to bedtime, and keeping the bedroom cool and dark. The American College of Physicians recommends cognitive behavioral therapy for insomnia (CBT-I) as the first-line treatment for chronic insomnia.",
+      "source": "UC Davis Health / NIH NCCIH / American College of Physicians 2016",
+      "tags": ["sleep_hygiene", "insomnia", "cbt_i", "melatonin", "circadian"]
+    },
+    {
+      "id": 64,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "Can probiotics improve immunity in healthy individuals?",
+      "answer": "Probiotics have the strongest evidence for antibiotic-associated diarrhea and GI conditions. Evidence for immune enhancement in healthy individuals is promising — some strains have shown reduced duration of upper respiratory infections — but not yet definitive. The immunological effects are strain-specific and dose-dependent.",
+      "source": "NIH NCCIH / PubMed",
+      "tags": ["probiotics", "immunity", "respiratory_infections", "gut_health"]
+    },
+    {
+      "id": 65,
+      "type": "factual",
+      "category": "wellness_coaching",
+      "question": "What is the role of protein supplements in a healthy diet?",
+      "answer": "Protein supplements help individuals meet daily protein needs, especially athletes, older adults, and those with low dietary intake. The RDA for protein is 0.8 g/kg body weight for sedentary adults. Athletes may need 1.2–2.0 g/kg. Whole food protein sources are preferred when achievable, but supplements are a safe and effective option when diet is insufficient.",
+      "source": "ISSN / NIH Dietary Guidelines",
+      "tags": ["protein", "whey", "rda", "athletes", "muscle_mass"]
+    },
+    {
+      "id": 66,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What supplements are essential during pregnancy?",
+      "answer": "The most critical supplements during pregnancy are: folic acid (400–600 mcg/day before and through first trimester to prevent NTDs), iron (27 mg/day to support fetal oxygen supply and prevent anemia), iodine (150 mcg/day supplement recommended by professional organizations), Vitamin D, calcium, and DHA omega-3. Most providers recommend a daily prenatal supplement.",
+      "source": "NIH ODS Pregnancy Health Professional Fact Sheet / Mayo Clinic",
+      "tags": ["pregnancy", "prenatal", "folic_acid", "iron", "iodine"]
+    },
+    {
+      "id": 67,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "How much folic acid should women take before and during pregnancy?",
+      "answer": "Most women should take 400–600 mcg of folic acid daily, starting at least 1 month before conception through the first trimester. Women with a previous NTD-affected pregnancy should take 4,000 mcg (4 mg)/day — a prescription dose. Because the neural tube closes within 28 days of conception, pre-conception supplementation is critical.",
+      "source": "NIH ODS / CDC / NCBI Bookshelf NBK132251",
+      "tags": ["folic_acid", "pregnancy", "ntd_prevention", "preconception"]
+    },
+    {
+      "id": 68,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What supplements are particularly important for vegans?",
+      "answer": "Vegans are at risk for deficiencies in Vitamin B12 (found almost exclusively in animal products — supplementation is essential), Vitamin D, long-chain omega-3s (EPA/DHA — algae-based supplements are the vegan alternative to fish oil), iron, zinc, calcium, and iodine. A well-planned vegan diet with targeted supplementation can prevent nutritional deficiency.",
+      "source": "NIH ODS / Academy of Nutrition and Dietetics",
+      "tags": ["vegans", "b12", "omega3", "zinc", "deficiency"]
+    },
+    {
+      "id": 69,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "Are supplements safe for children?",
+      "answer": "Children can benefit from age-appropriate supplements like Vitamin D (especially breastfed infants who receive little from breast milk), iron (if deficient), and fluoride (if water is unfluoridated). However, a 2023 study found that 22 of 25 melatonin gummy products were mislabeled, containing up to 347% of stated melatonin. A pediatrician should always be consulted before supplementing children.",
+      "source": "NIH NCCIH / CDC / MMWR 2024 (Freeman et al.)",
+      "tags": ["children", "supplement_safety", "vitamin_d", "melatonin", "mislabeling"]
+    },
+    {
+      "id": 70,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What should people with diabetes consider when taking supplements?",
+      "answer": "Magnesium, berberine, chromium, and alpha-lipoic acid may lower blood sugar and must be used carefully with diabetes medications to avoid hypoglycemia. All supplement use should be disclosed to the treating physician, and blood glucose should be monitored closely when starting any new supplement. Never replace prescribed medications with supplements without medical guidance.",
+      "source": "NIH ODS / PubMed",
+      "tags": ["diabetes", "hypoglycemia", "berberine", "magnesium", "supplement_safety"]
+    },
+    {
+      "id": 71,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What supplements help immune support during cold and flu season?",
+      "answer": "Zinc, Vitamin C, Vitamin D, probiotics, echinacea, and elderberry are commonly used for immune support. Zinc and Vitamin C have the strongest clinical evidence for reducing common cold duration. Vitamin D deficiency is linked to increased susceptibility to respiratory infections. Evidence for echinacea and elderberry is promising but inconsistent.",
+      "source": "NIH ODS / Healio Feb 2024",
+      "tags": ["immune_support", "zinc", "vitamin_c", "vitamin_d", "cold_flu"]
+    },
+    {
+      "id": 72,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "How should I evaluate the quality of a supplement brand?",
+      "answer": "Look for third-party verification from USP (U.S. Pharmacopeia), NSF International, or ConsumerLab. These organizations verify that products contain what the label states at the stated dose, without harmful contaminants. The FDA does not approve dietary supplements before market release — the manufacturer is responsible for safety and accuracy of labeling.",
+      "source": "NIH ODS / StatPearls Feb 2024 / FDA",
+      "tags": ["quality_verification", "usp", "nsf", "fda_regulation", "labeling"]
+    },
+    {
+      "id": 73,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "Can I take multiple supplements at the same time?",
+      "answer": "Many supplements can be taken together, but some interfere with absorption: calcium can inhibit iron and zinc absorption; magnesium and calcium compete; fat-soluble vitamins (A, D, E, K) need dietary fat. Best practice: separate iron from calcium by 2 hours, check interactions with a pharmacist, and take fat-soluble vitamins with meals containing fat.",
+      "source": "NIH ODS",
+      "tags": ["supplement_combinations", "absorption", "calcium_iron", "fat_soluble"]
+    },
+    {
+      "id": 74,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What are the signs of Vitamin D deficiency?",
+      "answer": "Vitamin D deficiency symptoms include bone pain, muscle weakness, fatigue, frequent infections, and mood changes including depression. Severe deficiency causes rickets in children (soft, weak bones) and osteomalacia in adults. Many people are asymptomatic. The standard diagnostic test is a blood test measuring serum 25-hydroxyvitamin D.",
+      "source": "NIH ODS / Mayo Clinic",
+      "tags": ["vitamin_d", "deficiency", "symptoms", "blood_test"]
+    },
+    {
+      "id": 75,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What is the best time of day to take fat-soluble vitamins?",
+      "answer": "Fat-soluble vitamins — A, D, E, and K — are best taken with a meal or snack that contains fat, as dietary fat is required for their absorption into the lymphatic system. Vitamin D is optimally absorbed when taken with the largest fat-containing meal of the day.",
+      "source": "NIH ODS / Harvard Health",
+      "tags": ["fat_soluble_vitamins", "timing", "absorption", "vitamin_d"]
+    },
+    {
+      "id": 76,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "Who should not take iron supplements?",
+      "answer": "People with hemochromatosis (hereditary iron overload disorder) must avoid iron supplements, as iron accumulates in organs and causes damage. Anyone without a confirmed iron deficiency should not supplement routinely, since excess iron can damage the liver, heart, and pancreas. Blood tests (serum ferritin, CBC, TIBC) should confirm deficiency before starting supplementation.",
+      "source": "NIH ODS Iron Health Professional Fact Sheet",
+      "tags": ["iron", "hemochromatosis", "contraindications", "blood_test"]
+    },
+    {
+      "id": 77,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "Is it true that supplements labeled 'natural' are always safe?",
+      "answer": "No. 'Natural' does not mean safe. Many natural substances are toxic at sufficient doses (e.g., pennyroyal, comfrey, aristolochic acid in some herbal products). Herbal supplements can have potent pharmacological effects and serious drug interactions. The FDA does not require safety testing of supplements before they reach the market. Safety must always be evaluated based on evidence.",
+      "source": "NIH ODS / FDA",
+      "tags": ["natural_supplements", "safety", "herbal_toxicity", "fda_regulation"]
+    },
+    {
+      "id": 78,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "Are OTC prenatal vitamins adequate for pregnancy?",
+      "answer": "A 2022 study of 48 OTC prenatal vitamins found that no product met adequate levels for all 5 key nutrients (folic acid, iron, DHA, Vitamin D, calcium) simultaneously, and only 10.4% met four of the five. Prescription prenatal vitamins tend to contain higher folic acid. Review the label carefully and consult an OB/GYN to identify nutrient gaps.",
+      "source": "PMC11100770 - Commercially Available Prenatal Vitamins Study 2022",
+      "tags": ["prenatal_vitamins", "pregnancy", "otc", "folic_acid", "dha"]
+    },
+    {
+      "id": 79,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "How do I know if a supplement claim is supported by scientific evidence?",
+      "answer": "Check the NIH ODS fact sheets (ods.od.nih.gov), NCCIH (nccih.nih.gov), the Natural Medicines Database, PubMed, and the Cochrane Library for evidence-based summaries. Be skeptical of claims based only on testimonials, animal studies, or in vitro research. The FDA does not evaluate supplement efficacy claims before market release.",
+      "source": "NIH ODS / FDA",
+      "tags": ["evidence_evaluation", "nih_ods", "pubmed", "supplement_claims"]
+    },
+    {
+      "id": 80,
+      "type": "factual",
+      "category": "personalized_qa",
+      "question": "What supplements are safe to take while breastfeeding?",
+      "answer": "Generally safe supplements during breastfeeding include continued prenatal vitamins, Vitamin D (600 IU/day), DHA omega-3 (infant brain development continues 2 years postpartum), and iodine (breastfed infants depend on maternal milk for iodine). Herbal supplements should be avoided without medical clearance, as many compounds transfer into breast milk.",
+      "source": "NIH ODS Pregnancy Fact Sheet / PMC7558284 / PMC12603366",
+      "tags": ["breastfeeding", "prenatal_vitamins", "dha", "iodine", "safety"]
+    },
+    {
+      "id": 81,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm 68 years old and my doctor prescribed warfarin for atrial fibrillation. I've been taking 2,000 mg of fish oil daily for my joints. Is this safe to continue?",
+      "answer": "You should inform your doctor about your fish oil use immediately. Fish oil has antiplatelet effects and, at 2,000 mg/day, may increase bleeding risk when combined with warfarin — particularly if your INR is already at the higher end of the therapeutic range. A documented case showed a patient's INR rise from 2.8 to 4.3 after doubling fish oil dose. Your anticoagulation clinic should monitor your INR more frequently while you continue fish oil. Your doctor may advise reducing the dose or switching to a lower-dose fish oil supplement. Do not stop either medication without medical guidance.",
+      "source": "PubMed 14742793 / NIH ODS Omega-3 HP Fact Sheet / Pillo.care",
+      "tags": ["warfarin", "fish_oil", "inr", "atrial_fibrillation", "drug_interaction"]
+    },
+    {
+      "id": 82,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "My friend recommended St. John's Wort for my mild depression. I'm currently on sertraline (Zoloft). Is it safe to take both?",
+      "answer": "No — this combination is potentially dangerous. St. John's Wort combined with SSRIs like sertraline can cause serotonin syndrome, a life-threatening condition with symptoms including agitation, rapid heartbeat, high blood pressure, high body temperature, and in severe cases, seizures or death. Additionally, St. John's Wort induces liver enzymes (CYP3A4) that can reduce sertraline blood levels, making your antidepressant less effective. Discuss mood support options with your prescribing physician before making any changes.",
+      "source": "NIH NCCIH / NCBI Bookshelf NBK216072 / MDLinx",
+      "tags": ["st_johns_wort", "sertraline", "ssri", "serotonin_syndrome", "danger"]
+    },
+    {
+      "id": 83,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm a 35-year-old woman taking oral contraceptives. I started taking St. John's Wort for stress relief about a month ago. Should I be concerned?",
+      "answer": "Yes, this is a significant concern. St. John's Wort is a documented inducer of CYP3A4 and the MDR1 transporter, which reduces the blood levels of oral contraceptive hormones. There are documented cases of breakthrough bleeding and unintended pregnancies in women who combined St. John's Wort with oral contraceptives. You should use a backup contraceptive method immediately and consult your OB/GYN. Discontinue St. John's Wort and discuss safer alternatives for stress management.",
+      "source": "NCBI Bookshelf NBK216072 / NIH NCCIH",
+      "tags": ["st_johns_wort", "oral_contraceptives", "drug_interaction", "contraceptive_failure"]
+    },
+    {
+      "id": 84,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I had a kidney transplant 2 years ago and take cyclosporine. I saw that St. John's Wort helps with mood. Can I use it?",
+      "answer": "Absolutely not. This is one of the most serious documented supplement-drug interactions. St. John's Wort significantly reduces cyclosporine blood levels by inducing CYP3A4 and MDR1 transporters, leading to subtherapeutic cyclosporine levels. There are published cases of acute organ rejection in transplant patients who took St. John's Wort. This combination is contraindicated. Discuss mood concerns with your transplant team, who can recommend safe options.",
+      "source": "NCBI Bookshelf NBK216072 / Karliova et al. J Hepatol 2000",
+      "tags": ["cyclosporine", "organ_transplant", "st_johns_wort", "organ_rejection", "contraindicated"]
+    },
+    {
+      "id": 85,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I've been taking 10,000 IU of Vitamin D daily for 6 months because I read it helps everything. I'm now having nausea, weakness, and frequent urination. What could be wrong?",
+      "answer": "Your symptoms are consistent with Vitamin D toxicity (hypervitaminosis D), which causes hypercalcemia (elevated blood calcium). At 10,000 IU/day over 6 months, you are significantly above the Tolerable Upper Intake Level of 4,000 IU/day for adults. Symptoms of hypercalcemia include nausea, vomiting, weakness, excessive urination, and kidney pain. You should stop taking Vitamin D and seek medical attention promptly for blood calcium and 25-hydroxyvitamin D testing. Vitamin D toxicity is almost always caused by excessive supplementation, not sun exposure or diet.",
+      "source": "NIH ODS Vitamin D HP / Harvard Health / PMC10195747",
+      "tags": ["vitamin_d", "toxicity", "hypercalcemia", "overdose", "10000_iu"]
+    },
+    {
+      "id": 86,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm taking atorvastatin for high cholesterol. I read that high-dose Vitamin D might reduce its effectiveness. Should I stop my Vitamin D supplement?",
+      "answer": "Do not stop your statin without consulting your doctor. The potential interaction between high-dose Vitamin D and statins (including atorvastatin) may affect statin metabolism, but this does not mean all Vitamin D supplementation is contraindicated. For most people, the standard dose of 600–2,000 IU/day is unlikely to cause significant interaction. Discuss your current Vitamin D dose with your prescribing physician, who can review your cholesterol levels and determine the safest approach.",
+      "source": "NIH ODS Vitamin D Consumer Fact Sheet",
+      "tags": ["atorvastatin", "statin", "vitamin_d", "drug_interaction", "cholesterol"]
+    },
+    {
+      "id": 87,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I have stage 3 chronic kidney disease and a friend suggested I take 500 mg of magnesium glycinate for sleep. Is this safe?",
+      "answer": "You should not take this dose without consulting your nephrologist first. In chronic kidney disease (CKD), the kidneys cannot efficiently excrete excess magnesium. What is safe for a person with normal kidney function can accumulate to toxic levels in CKD, causing hypermagnesemia (symptoms: low blood pressure, breathing difficulty, cardiac conduction problems). Your nephrologist may allow a lower dose under monitoring, but self-supplementing at 500 mg is risky at stage 3 CKD.",
+      "source": "NIH ODS Magnesium HP / NIDDK",
+      "tags": ["kidney_disease", "magnesium", "hypermagnesemia", "ckd", "contraindication"]
+    },
+    {
+      "id": 88,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm scheduled for hip replacement surgery in 3 weeks. I currently take ginkgo biloba, fish oil (3g/day), and Vitamin E (800 IU). What should I know?",
+      "answer": "All three of these supplements significantly increase bleeding risk and should generally be stopped before surgery. Ginkgo biloba and fish oil have antiplatelet effects; high-dose Vitamin E (above 400 IU) has strong antiplatelet activity. Standard surgical protocols typically require stopping antiplatelet supplements 7–14 days before elective surgery, and ginkgo at least 36 hours prior. You must disclose all supplements to your surgeon and anesthesiologist immediately — do not stop any on your own without their guidance.",
+      "source": "NIH ODS / Pillo.care / Pharmacy Times",
+      "tags": ["surgery", "bleeding_risk", "ginkgo_biloba", "fish_oil", "vitamin_e", "preoperative"]
+    },
+    {
+      "id": 89,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm taking lisinopril for blood pressure and want to start taking potassium supplements because I read they help blood pressure. Is this safe?",
+      "answer": "This combination requires medical evaluation before proceeding. Lisinopril is an ACE inhibitor that causes potassium retention by inhibiting aldosterone. Adding potassium supplements on top can lead to hyperkalemia (dangerously high blood potassium), which can cause life-threatening cardiac arrhythmias. Before supplementing, your doctor should check your current potassium blood levels. Dietary sources of potassium (bananas, avocados, sweet potatoes) are generally safer than supplements for managing blood pressure.",
+      "source": "NIH ODS / Drugs.com Drug Interaction",
+      "tags": ["lisinopril", "potassium", "hyperkalemia", "ace_inhibitor", "blood_pressure"]
+    },
+    {
+      "id": 90,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I have type 2 diabetes and take metformin. I want to add berberine because I heard it helps blood sugar. Is this okay?",
+      "answer": "Berberine can lower blood glucose, and combining it with metformin may have additive effects that increase the risk of hypoglycemia (low blood sugar). Both activate AMPK, a similar pathway. While some research suggests berberine is beneficial for blood glucose management, combining it with antidiabetic medications requires physician oversight. Disclose berberine to your diabetes care team, establish baseline glucose levels, and monitor closely if approved. Never adjust your metformin dose without guidance.",
+      "source": "NIH ODS / PubMed",
+      "tags": ["berberine", "metformin", "diabetes", "hypoglycemia", "drug_interaction"]
+    },
+    {
+      "id": 91,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm 8 weeks pregnant and haven't been taking any prenatal vitamins. I'm now worried about my baby's health. What should I do?",
+      "answer": "Start a prenatal vitamin that contains folic acid immediately and contact your OB/GYN today. While the neural tube closes around 28 days of conception (often before women know they are pregnant), folic acid still plays important roles throughout pregnancy in cell division and fetal development. Your provider will assess whether your folate stores are adequate and may recommend additional iron, iodine, DHA, and Vitamin D based on your diet and blood tests. Most providers recommend starting prenatal vitamins 1–3 months before conception, but it is not too late — every day counts.",
+      "source": "NIH ODS Pregnancy HP / CDC / PMC7558284",
+      "tags": ["pregnancy", "prenatal_vitamins", "folic_acid", "neural_tube", "late_start"]
+    },
+    {
+      "id": 92,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm a strict vegan and have been feeling extremely tired and having numbness in my hands and feet. Could my diet be causing this?",
+      "answer": "Yes, your symptoms are consistent with Vitamin B12 deficiency, which is common in vegans. B12 is found almost exclusively in animal products, and deficiency causes fatigue, neurological symptoms (numbness, tingling, balance problems), and megaloblastic anemia. Untreated B12 deficiency can cause permanent nerve damage. See a doctor for a blood test (serum B12, methylmalonic acid, complete blood count). If confirmed, B12 supplementation or injections will be prescribed. All vegans should supplement B12 consistently.",
+      "source": "NIH ODS Vitamin B12 Fact Sheet",
+      "tags": ["vegan", "b12_deficiency", "neuropathy", "fatigue", "urgent"]
+    },
+    {
+      "id": 93,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "My 7-year-old has trouble falling asleep. A parent group online suggested giving him 5 mg of melatonin every night. Is this appropriate?",
+      "answer": "5 mg is likely too high for a 7-year-old. Evidence-based guidelines suggest school-aged children typically receive 1–3 mg, starting at the lowest effective dose. Critically, a 2023 study found that 22 of 25 melatonin gummy products were mislabeled — many contained up to 347% of stated melatonin, meaning a labeled '1 mg' gummy could contain 3.5 mg. Before giving your child melatonin: (1) consult his pediatrician, (2) establish good sleep hygiene first (consistent bedtime, no screens 1 hour before bed), and (3) choose USP-verified products if melatonin is approved.",
+      "source": "NIH NCCIH / MMWR 2024 Freeman et al. / StatPearls Feb 2024",
+      "tags": ["children", "melatonin", "dosage", "mislabeling", "sleep"]
+    },
+    {
+      "id": 94,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm 74 years old and my doctor recommended Vitamin D. A supplement I found at the pharmacy has 5,000 IU. Is that dose safe for me?",
+      "answer": "5,000 IU is above the standard RDA (800 IU for adults over 70) but below the Tolerable Upper Intake Level of 4,000 IU for routine use — however, the 2024 Endocrine Society guidelines specifically recommend Vitamin D supplementation for adults 75+ due to reduced skin synthesis. Your doctor recommended supplementation, which is appropriate. Discuss the specific dose with them — 5,000 IU may be appropriate for correcting a deficiency but may be more than needed for maintenance. Blood testing of your 25-hydroxyvitamin D level will guide the right dose for you.",
+      "source": "Harvard Health 2024 / NIH ODS / Endocrine Society 2024",
+      "tags": ["elderly", "vitamin_d", "5000_iu", "dosing", "75_plus"]
+    },
+    {
+      "id": 95,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm a competitive runner and have been taking 60 mg of zinc per day because someone told me it boosts immunity. Is this too much?",
+      "answer": "Yes, 60 mg/day exceeds the Tolerable Upper Intake Level for zinc (40 mg/day for adults). Long-term intake above the UL can cause copper deficiency (because zinc inhibits copper absorption), leading to neurological symptoms, anemia, and immune dysfunction — the opposite of what you are trying to achieve. Dizziness and stomach cramps are early side effects of excess zinc. For immune support during intense training, 8–11 mg/day (the RDA) is appropriate for most adults, ideally from food. Reduce your dose and consult a sports dietitian.",
+      "source": "NIH ODS Zinc Fact Sheet / Healio Feb 2024",
+      "tags": ["zinc", "overdose", "copper_deficiency", "athlete", "upper_limit"]
+    },
+    {
+      "id": 96,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "I was just diagnosed with osteoporosis. My doctor prescribed bisphosphonates (alendronate). Can I take calcium and Vitamin D alongside this medication?",
+      "answer": "Yes, and in fact calcium and Vitamin D are typically recommended alongside bisphosphonate therapy for osteoporosis. However, timing is critical: alendronate must be taken on an empty stomach first thing in the morning with a full glass of water, and you must wait at least 30 minutes before eating or taking any other medications including calcium supplements. Taking calcium too close to alendronate significantly reduces alendronate absorption. Take your calcium supplement with meals (not in the morning with the medication).",
+      "source": "NIH ODS / Mayo Clinic / FDA",
+      "tags": ["osteoporosis", "bisphosphonates", "alendronate", "calcium", "vitamin_d", "timing"]
+    },
+    {
+      "id": 97,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "I have ADHD and my nutritionist suggested omega-3 supplements might help. What does the evidence say?",
+      "answer": "Some clinical trials and meta-analyses suggest modest improvements in ADHD symptoms (particularly hyperactivity and impulsivity) with omega-3 supplementation, especially EPA-dominant formulations. The effect size is smaller than that of stimulant medications. A typical studied dose is 1–2 g EPA/day. Omega-3s are generally safe and may be a reasonable adjunctive support, but they should not replace prescribed ADHD medications without physician approval. Discuss this with your neurologist or psychiatrist.",
+      "source": "NIH ODS Omega-3 HP / PubMed",
+      "tags": ["adhd", "omega3", "epa", "adjunctive_therapy"]
+    },
+    {
+      "id": 98,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "I have IBS with constipation. A friend suggested magnesium citrate. How should I use it?",
+      "answer": "Magnesium citrate can help with constipation-predominant IBS by drawing water into the bowel. However, at high doses it acts as an osmotic laxative — start with a lower dose (e.g., 150–200 mg elemental magnesium at bedtime) and adjust. Excessive magnesium causes diarrhea, which would worsen your IBS symptoms. If you have kidney disease, magnesium should only be used under medical supervision. Also consider soluble fiber (psyllium) and dietary changes as primary strategies, which have strong evidence for IBS-C.",
+      "source": "NIH ODS Magnesium Consumer / NIH NCCIH",
+      "tags": ["ibs_constipation", "magnesium_citrate", "laxative", "fiber", "bowel"]
+    },
+    {
+      "id": 99,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "I'm perimenopausal and experiencing hot flashes, sleep problems, and mood changes. Which supplements might help?",
+      "answer": "Several supplements have evidence for menopausal symptoms: black cohosh has the most studied evidence for hot flash reduction, with generally good short-term safety. Phytoestrogens (isoflavones from soy or red clover) may modestly reduce hot flash frequency in some women. Magnesium glycinate may help with sleep and mood. However, women with hormone-sensitive conditions (e.g., certain breast cancers) should avoid phytoestrogens and black cohosh. Always discuss with your OB/GYN, as hormone therapy remains the most effective option for severe symptoms.",
+      "source": "NIH NCCIH / PubMed",
+      "tags": ["menopause", "hot_flashes", "black_cohosh", "phytoestrogens", "magnesium"]
+    },
+    {
+      "id": 100,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "I've been diagnosed with age-related macular degeneration (AMD) at the intermediate stage. Should I take the AREDS2 formula?",
+      "answer": "Yes. The AREDS2 formula is specifically recommended for people with intermediate AMD or advanced AMD in one eye. The formula includes Vitamin C (500 mg), Vitamin E (400 IU), zinc (80 mg), copper (2 mg), lutein (10 mg), and zeaxanthin (2 mg), and reduced the risk of progression to advanced AMD by approximately 25% in the original AREDS2 trial. Lutein and zeaxanthin replaced beta-carotene (which increased lung cancer risk in smokers). Discuss with your ophthalmologist to confirm the AREDS2 formula is right for your stage of AMD.",
+      "source": "NEI AREDS2 Study / NIH ODS",
+      "tags": ["amd", "areds2", "macular_degeneration", "lutein", "zeaxanthin", "eye_health"]
+    },
+    {
+      "id": 101,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I'm a 45-year-old woman training for a marathon. I feel exhausted even with adequate sleep and nutrition. What supplements should I consider?",
+      "answer": "Exhaustion despite adequate sleep and nutrition in a female athlete should prompt evaluation for iron-deficiency anemia, which is especially common in female endurance athletes. Ask your doctor for a complete blood count and serum ferritin test. Vitamin D deficiency is also prevalent and causes fatigue and muscle weakness. Additionally, B12, magnesium, and CoQ10 are worth assessing. If deficiency is confirmed, targeted supplementation is appropriate. Do not self-supplement iron without testing, as excess iron can cause organ damage.",
+      "source": "NIH ODS Iron HP / NIH ODS Vitamin D / ISSN",
+      "tags": ["female_athlete", "fatigue", "iron_deficiency", "vitamin_d", "endurance"]
+    },
+    {
+      "id": 102,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I work night shifts and have a hard time sleeping during the day. Would melatonin help, and when should I take it?",
+      "answer": "Melatonin can help shift workers adjust their sleep timing. For daytime sleep after a night shift, take 0.5–3 mg melatonin about 30 minutes before your intended sleep time. Two 2014 research reviews found shift workers taking melatonin slept about 24 minutes longer during the daytime. The evidence was considered low quality and inconclusive for other sleep parameters. Complementary strategies: use blackout curtains, reduce noise and light exposure during your sleep window, and maintain consistency even on days off.",
+      "source": "NIH NCCIH / SleepFoundation.org",
+      "tags": ["shift_work", "melatonin", "daytime_sleep", "circadian_rhythm"]
+    },
+    {
+      "id": 103,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "My 80-year-old father has been falling frequently and his doctor mentioned low Vitamin D might be a factor. What should we know?",
+      "answer": "This is clinically well-supported. Vitamin D is needed for normal muscle fiber development and growth, and deficiency contributes to muscle weakness and impaired balance, both of which increase fall risk. The 2024 Endocrine Society guidelines specifically recommend Vitamin D supplementation for adults 75 and older. Your father's doctor should test his 25-hydroxyvitamin D levels and prescribe an appropriate dose. Typical goals are serum levels of 50 nmol/L (20 ng/mL) or higher. Combined with physical therapy and fall prevention exercises, Vitamin D supplementation can meaningfully reduce fall risk.",
+      "source": "NIH ODS Vitamin D HP / Endocrine Society 2024 / Harvard Health 2024",
+      "tags": ["elderly_falls", "vitamin_d", "muscle_weakness", "fall_prevention", "75_plus"]
+    },
+    {
+      "id": 104,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I've been taking 20 mg of melatonin nightly for 3 months because the lower doses didn't seem to work. I'm now having vivid nightmares and feeling groggy all day. Should I be concerned?",
+      "answer": "Yes. 20 mg is far above recommended doses and is associated with the side effects you describe — vivid dreams, nightmares, daytime grogginess, and dizziness. Effective doses for most adults are 0.5–5 mg, and higher doses do not necessarily produce better sleep. More melatonin does not mean more sleep; what matters is timing relative to your circadian rhythm. Reduce your dose significantly — start at 1–3 mg — and consult a doctor. A 2023 study also found that many commercial melatonin products contain far more melatonin than their label states, so check your product's third-party certification.",
+      "source": "SleepFoundation.org / PMC10053496 / MMWR 2023 gummy study",
+      "tags": ["melatonin", "high_dose", "nightmares", "grogginess", "overdose"]
+    },
+    {
+      "id": 105,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I'm a 30-year-old bodybuilder considering taking creatine. Is it safe, and what dose should I use?",
+      "answer": "Creatine monohydrate is one of the most extensively studied and safest performance supplements. The International Society of Sports Nutrition (ISSN) has confirmed it is safe for long-term use in healthy adults. Standard dosing: an optional loading phase of 20 g/day divided into 4 doses for 5–7 days (to saturate muscle stores faster), followed by a maintenance dose of 3–5 g/day. Alternatively, skip the loading phase and take 3–5 g/day consistently. Creatine causes water retention in muscles (not fat gain) and may slightly increase body weight. Adequate hydration is important.",
+      "source": "ISSN Position Stand on Creatine / PubMed",
+      "tags": ["creatine", "bodybuilding", "loading_phase", "maintenance_dose", "safety"]
+    },
+    {
+      "id": 106,
+      "type": "situational",
+      "category": "supplement_insights",
+      "question": "I bought a 'liver detox' supplement at the health food store containing milk thistle, dandelion root, and artichoke extract. Will it actually detoxify my liver?",
+      "answer": "The claim that any supplement 'detoxifies' your liver is not supported by strong clinical evidence. Your liver is the body's detoxification organ and does this continuously on its own in healthy people. Milk thistle (silymarin) has the best evidence among common liver supplements for reducing liver enzyme elevation in certain liver diseases, but evidence for detox effects in healthy people is lacking. Dandelion root and artichoke extract have some preliminary evidence but no robust clinical trials. A healthy diet, avoiding excess alcohol, and maintaining a healthy weight are the most evidence-backed ways to support liver health.",
+      "source": "NIH NCCIH / PMC",
+      "tags": ["liver_detox", "milk_thistle", "supplement_claims", "evidence_based"]
+    },
+    {
+      "id": 107,
+      "type": "situational",
+      "category": "supplement_insights",
+      "question": "I purchased a magnesium supplement and the bottle says 500 mg 'magnesium oxide.' But I've heard magnesium oxide is poorly absorbed. Did I waste my money?",
+      "answer": "Magnesium oxide has lower bioavailability than other forms — only about 4% may be absorbed compared to 12–30% for magnesium citrate or glycinate. However, it is not entirely without value: it has a laxative effect and can help with constipation, and it is the most concentrated form by weight (high elemental magnesium per mg). For addressing magnesium deficiency or sleep/muscle support, better-absorbed forms like magnesium glycinate, citrate, or malate are preferred. For your next purchase, consider switching to magnesium glycinate or citrate for better therapeutic effect.",
+      "source": "NIH ODS Magnesium HP / Medical News Today",
+      "tags": ["magnesium_oxide", "bioavailability", "magnesium_glycinate", "form_comparison"]
+    },
+    {
+      "id": 108,
+      "type": "situational",
+      "category": "supplement_insights",
+      "question": "I take curcumin supplements but read they're poorly absorbed. A new product claims 'enhanced bioavailability' using BCM-95 technology. Is this meaningful?",
+      "answer": "Yes, bioavailability enhancement is scientifically meaningful for curcumin. Standard curcumin has very low absorption due to poor water solubility and rapid metabolism. BCM-95 (or Biocurcumax) is a patented curcumin-essential oil complex that has shown 7-fold higher bioavailability than standard curcumin in clinical studies. Other validated enhancement approaches include piperine (black pepper extract, increases absorption by up to 2,000%), liposomal curcumin, and nanoparticle formulations. When comparing curcumin products, look for products with bioavailability data from human studies, not just animal or in-vitro research.",
+      "source": "NIH NCCIH / PubMed",
+      "tags": ["curcumin", "bioavailability", "bcm95", "piperine", "absorption"]
+    },
+    {
+      "id": 109,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm on chemotherapy for breast cancer and want to take antioxidant supplements (Vitamin C, Vitamin E, and selenium) to protect my healthy cells. Is this safe?",
+      "answer": "This is a high-stakes question that must be discussed with your oncologist before proceeding. Some chemotherapy agents (like doxorubicin) work partly through oxidative mechanisms that target cancer cells. High-dose antioxidant supplements during chemotherapy may theoretically interfere with treatment efficacy by neutralizing these effects. The NatMed database (2024) has identified specific antioxidant-drug interactions with chemotherapeutic agents. Your oncologist is best positioned to weigh the potential benefits and risks for your specific chemotherapy protocol and cancer type.",
+      "source": "PMC11698021 - NatMed / NaturalMedicines / NIH ODS",
+      "tags": ["chemotherapy", "antioxidants", "vitamin_c", "vitamin_e", "cancer_treatment"]
+    },
+    {
+      "id": 110,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm comparing two prenatal vitamins. Brand A has 800 mcg folic acid, 27 mg iron, 200 mg DHA, 400 IU Vitamin D, and 200 mg calcium. Brand B has 400 mcg folic acid but 1,000 IU Vitamin D and 300 mg DHA. Which is better?",
+      "answer": "Neither brand is perfect, and a 2022 study found that no OTC prenatal vitamin met all 5 key nutrient targets simultaneously. Brand A has stronger folic acid (800 mcg > the 400–600 mcg minimum), meets the iron RDA (27 mg), and has a baseline DHA amount. Brand B has higher Vitamin D (1,000 IU) and DHA, which benefits fetal brain development. However, Brand B's 400 mcg folic acid is at the minimum. If choosing between these: Brand A is likely superior in the first trimester when NTD risk is highest (folic acid prioritized). Discuss with your OB/GYN whether you need separate DHA or Vitamin D supplements to complement either option.",
+      "source": "PMC11100770 / NIH ODS Pregnancy HP / Mayo Clinic Prenatal Vitamins",
+      "tags": ["prenatal_vitamins", "comparison", "folic_acid", "dha", "vitamin_d", "pregnancy"]
+    },
+    {
+      "id": 111,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm 55 and starting to forget things more often. My friend takes Ginkgo biloba and says it helps memory. Should I try it?",
+      "answer": "The evidence for ginkgo biloba in preventing or treating cognitive decline in healthy older adults is not convincing. Several large clinical trials, including a major NIH-funded trial (GEM study), found ginkgo biloba did not reduce the incidence of dementia or Alzheimer's disease. Additionally, ginkgo has significant antiplatelet effects and can interact with blood thinners, aspirin, and other medications. Before starting ginkgo, consider first discussing omega-3 DHA, B vitamins (to reduce homocysteine), and lifestyle strategies (exercise, sleep, Mediterranean diet) with your physician — these have broader evidence for brain health.",
+      "source": "NIH NCCIH / NIH ODS",
+      "tags": ["ginkgo_biloba", "memory", "cognitive_decline", "elderly", "evidence_lacking"]
+    },
+    {
+      "id": 112,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I've been told my thyroid is 'sluggish' and I want to take an iodine supplement and selenium supplement to support it. How much should I take?",
+      "answer": "Iodine and selenium both play roles in thyroid function, but supplementation requires caution and ideally a proper thyroid diagnosis first (TSH, T3, T4 blood tests). Too much iodine can actually worsen thyroid dysfunction — including triggering hypothyroidism or hyperthyroidism — especially in people with underlying thyroid conditions. The RDA for iodine is 150 mcg/day for adults; most Americans get enough from iodized salt and dairy. Selenium (55 mcg/day RDA, UL 400 mcg) plays a role in converting T4 to active T3. Self-supplementing high doses of either without medical guidance can do more harm than good. See an endocrinologist for proper evaluation.",
+      "source": "NIH ODS Iodine / Selenium Fact Sheets",
+      "tags": ["thyroid", "iodine", "selenium", "hypothyroidism", "endocrinologist"]
+    },
+    {
+      "id": 113,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "My doctor says I have prediabetes and recommended lifestyle changes. Can supplements help in addition to diet and exercise?",
+      "answer": "The 2024 Endocrine Society guidelines specifically recommend Vitamin D supplementation for adults with prediabetes, noting evidence it may slow progression to type 2 diabetes. Magnesium adequacy is associated with better insulin sensitivity. Berberine shows promising blood glucose-lowering evidence. However, supplements are adjunctive — not substitutes — for the lifestyle changes (diet, exercise, weight management) your doctor recommended, which remain the most effective interventions for prediabetes reversal. Discuss any supplements with your care team to avoid hypoglycemia.",
+      "source": "Endocrine Society 2024 / NIH ODS Magnesium / PubMed Berberine",
+      "tags": ["prediabetes", "vitamin_d", "magnesium", "berberine", "insulin_sensitivity"]
+    },
+    {
+      "id": 114,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm breastfeeding and a coworker suggested I take 1,000 mg of Vitamin A daily to boost my breast milk nutrients. Is this safe?",
+      "answer": "1,000 mg (1,000,000 mcg) would be an extraordinarily dangerous dose — this appears to be a confusion in units. The RDA for breastfeeding women is 1,300 mcg RAE (Retinol Activity Equivalents) of Vitamin A per day, equivalent to about 4,333 IU. The Tolerable Upper Intake Level is 3,000 mcg RAE/day. High-dose Vitamin A is toxic and teratogenic — it causes headaches, liver toxicity, bone pain, and birth defects. A standard prenatal or postnatal multivitamin provides the right amount. Do not take standalone high-dose Vitamin A supplements without medical supervision.",
+      "source": "NIH ODS Vitamin A Fact Sheet / PMC7558284",
+      "tags": ["breastfeeding", "vitamin_a", "toxicity", "dosage_confusion", "safety"]
+    },
+    {
+      "id": 115,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I've been experiencing muscle cramps at night, especially in my calves. Could a supplement help, and which one?",
+      "answer": "Nocturnal leg cramps are often associated with magnesium, potassium, or calcium insufficiency, as these minerals regulate muscle contraction and relaxation. Magnesium glycinate or citrate at 200–400 mg taken in the evening has the most clinical evidence for reducing muscle cramps. Ensure adequate potassium intake from foods (bananas, potatoes, beans). Before supplementing, consider dehydration, medication-induced cramping (statins, diuretics), or circulation issues as causes. If cramps are severe or frequent, consult a physician to rule out underlying conditions.",
+      "source": "NIH ODS Magnesium Consumer / Medical News Today",
+      "tags": ["muscle_cramps", "magnesium", "potassium", "nocturnal_cramps", "sleep"]
+    },
+    {
+      "id": 116,
+      "type": "situational",
+      "category": "supplement_insights",
+      "question": "I see 'collagen peptides' everywhere and they claim to improve skin, joints, and hair. Does the science support these claims?",
+      "answer": "Evidence is emerging but not yet definitive. For skin elasticity, several randomized controlled trials show modest improvements in skin hydration and elasticity with 2.5–10 g/day hydrolyzed collagen peptides over 8–12 weeks. For joints, some trials in osteoarthritis patients show pain reduction. Hair and nail effects have weaker evidence. Collagen is a protein, and it is digested into amino acids — so any benefit relies on those amino acids (particularly glycine, proline, hydroxyproline) being incorporated into your own tissues. It is generally safe but expensive; adequate protein intake, Vitamin C (needed for collagen synthesis), and Zinc are also important.",
+      "source": "PubMed / NIH ODS",
+      "tags": ["collagen", "skin_health", "joints", "evidence_emerging", "peptides"]
+    },
+    {
+      "id": 117,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm lactose intolerant and avoid all dairy. Am I at risk for calcium deficiency, and what supplements should I consider?",
+      "answer": "Yes, lactose-intolerant individuals who avoid all dairy are at increased risk for calcium deficiency. Adults 19–50 need 1,000 mg/day; those over 51 need 1,200 mg/day (women) or 1,000–1,200 mg/day (men). Non-dairy calcium sources include: fortified plant-based milks (often 300 mg per cup), fortified orange juice, canned sardines and salmon with bones, tofu made with calcium sulfate, and dark leafy greens (kale, bok choy). If diet is still insufficient, calcium citrate is preferable to calcium carbonate (better absorption without food/stomach acid). Pair with Vitamin D for optimal absorption.",
+      "source": "NIH ODS Calcium Fact Sheet",
+      "tags": ["lactose_intolerance", "calcium", "dairy_free", "calcium_citrate", "vitamin_d"]
+    },
+    {
+      "id": 118,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "I have high triglycerides (350 mg/dL) and my doctor is considering medication. Can omega-3 supplements help enough to delay or avoid medication?",
+      "answer": "Omega-3 supplementation can significantly reduce triglycerides — prescription-strength omega-3s (4 g/day EPA+DHA) are FDA-approved specifically for severe hypertriglyceridemia and can reduce triglycerides by 20–50%. Each 1 g/day of omega-3s reduces triglycerides by approximately 5.9 mg/dL. At 350 mg/dL, dietary changes (reducing refined carbohydrates, alcohol, and sugars) combined with 2–4 g/day EPA+DHA under medical supervision may provide meaningful benefit. This decision should be made with your physician, who can weigh your full cardiovascular risk profile.",
+      "source": "NIH ODS Omega-3 HP / AHA",
+      "tags": ["hypertriglyceridemia", "omega3", "triglycerides", "cardiovascular", "fda_approved"]
+    },
+    {
+      "id": 119,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm on long-term omeprazole (proton pump inhibitor) for acid reflux. My pharmacist mentioned I might become deficient in some nutrients. Which ones?",
+      "answer": "Long-term PPI use (omeprazole and similar drugs) is associated with deficiencies in: Magnesium (the FDA issued a Drug Safety Communication in 2011 about this risk — PPIs reduce magnesium absorption), Vitamin B12 (stomach acid is needed to release B12 from food proteins), and Vitamin C (stomach acid facilitates iron absorption from non-heme sources; PPIs may also affect C absorption). Ask your doctor to monitor serum magnesium and B12 levels periodically, and consider supplementation if levels fall below normal. Do not stop your PPI without guidance.",
+      "source": "FDA Drug Safety Communication 2011 / NIH ODS Magnesium HP",
+      "tags": ["proton_pump_inhibitor", "omeprazole", "magnesium", "b12", "deficiency"]
+    },
+    {
+      "id": 120,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I was recently prescribed lithium for bipolar disorder. Are there any supplements I should avoid?",
+      "answer": "Yes. Several supplements and dietary factors can affect lithium levels. Caffeine increases urinary lithium excretion (lowering levels). High doses of NSAIDs, sodium restriction, or significant dehydration can increase lithium toxicity risk. Herbal supplements like St. John's Wort, valerian, and kava have CNS-active properties that may complicate lithium therapy. Iodine excess can worsen the thyroid effects of lithium. Always disclose all supplements to your psychiatrist and pharmacist. Lithium has a narrow therapeutic window, so interactions can have serious consequences.",
+      "source": "NIH NCCIH / Drugs.com / PubMed",
+      "tags": ["lithium", "bipolar", "drug_interaction", "narrow_therapeutic_window", "safety"]
+    },
+    {
+      "id": 121,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I'm preparing to travel across 8 time zones next week for a business trip. Can melatonin help with jet lag, and how should I use it?",
+      "answer": "Yes. Melatonin is one of the best-studied supplements for jet lag and can help reset your circadian rhythm. For eastward travel (most challenging), start taking 0.5–3 mg at your destination's target bedtime. For westward travel, take it later in your destination's evening. Begin 1–2 days before travel or on the day of arrival. Avoid higher doses (5–10 mg) as they do not improve sleep quality and increase side effects. Combine with: exposure to bright light at the right times (morning at destination for eastward travel), staying hydrated, and avoiding alcohol on the flight.",
+      "source": "NIH NCCIH / SleepFoundation.org / StatPearls",
+      "tags": ["jet_lag", "melatonin", "circadian_rhythm", "travel", "eastward_travel"]
+    },
+    {
+      "id": 122,
+      "type": "situational",
+      "category": "supplement_insights",
+      "question": "I've been taking elderberry syrup during cold and flu season for years. Is this evidence-based or just hype?",
+      "answer": "Elderberry (Sambucus nigra) has some promising but preliminary evidence. A 2016 randomized controlled trial found elderberry extract reduced cold duration by 2 days in air travelers. A 2020 meta-analysis suggested elderberry may reduce upper respiratory symptom duration. However, the overall quality of evidence is low to moderate — most studies are small and industry-funded. Elderberry appears safe for short-term use in healthy adults. It should not be used raw (contains potentially toxic compounds) and evidence in immunocompromised individuals is insufficient.",
+      "source": "PubMed / NIH NCCIH",
+      "tags": ["elderberry", "immune_support", "cold_flu", "evidence_level", "antiviral"]
+    },
+    {
+      "id": 123,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I take levothyroxine for hypothyroidism and recently started taking iron, calcium, and magnesium in the morning with my thyroid pill. Could this be causing my TSH to go up?",
+      "answer": "Yes — this is very likely the cause of your rising TSH. Iron, calcium, and magnesium all significantly reduce the absorption of levothyroxine when taken concurrently. Levothyroxine has strict absorption requirements: it must be taken on an empty stomach, 30–60 minutes before food, and separated from all mineral supplements by at least 4 hours (some experts recommend 2 hours minimum). Separate your iron, calcium, and magnesium to a different time of day — evening is often best. Recheck your TSH 6–8 weeks after correcting the timing to see if levels normalize.",
+      "source": "NIH ODS Iron HP / FDA / PubMed",
+      "tags": ["levothyroxine", "hypothyroidism", "iron", "calcium", "absorption_interference", "tsh"]
+    },
+    {
+      "id": 124,
+      "type": "situational",
+      "category": "condition_guidance",
+      "question": "My 70-year-old mother has depression and low Vitamin D levels (18 ng/mL). Her doctor recommended Vitamin D. Will this also help her depression?",
+      "answer": "There is a plausible association between low Vitamin D and depression, and correcting a true deficiency (below 20 ng/mL) is clinically important for bone health, immunity, and muscle function. Some studies show modest mood improvement with Vitamin D correction in deficient individuals. However, Vitamin D supplementation alone is not a proven antidepressant and should not replace evaluation and treatment for clinical depression. Her doctor is right to correct the deficiency. If mood does not improve after 3–6 months of normalized Vitamin D levels, further mental health evaluation and treatment should be pursued.",
+      "source": "Harvard Health 2024 / NIH ODS / Endocrine Society 2024",
+      "tags": ["depression", "vitamin_d_deficiency", "elderly", "mood", "treatment"]
+    },
+    {
+      "id": 125,
+      "type": "situational",
+      "category": "supplement_insights",
+      "question": "A supplement company claims their product 'cures' joint pain using a proprietary blend. The label shows 1,500 mg glucosamine, 1,200 mg chondroitin, and an unnamed 'herbal complex.' Should I trust this?",
+      "answer": "Be cautious of the 'cure' claim — the FDA prohibits dietary supplements from claiming to cure diseases. Glucosamine and chondroitin have mixed evidence for joint pain; the large GAIT trial (NIH-funded) found modest benefit for moderate-to-severe knee osteoarthritis pain, but not significant benefit overall. The 'unnamed herbal complex' is a red flag — proprietary blends hide the actual amounts of individual ingredients, making it impossible to evaluate safety or efficacy. Look for products with transparent labeling, third-party USP or NSF certification, and evidence-based individual ingredient doses.",
+      "source": "NIH ODS / FDA / NCCIH",
+      "tags": ["glucosamine", "chondroitin", "proprietary_blend", "joint_pain", "label_transparency"]
+    },
+    {
+      "id": 126,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I'm a 28-year-old man who rarely eats fish. My doctor says my omega-3 levels are low. What are my options besides fish oil?",
+      "answer": "If you cannot or do not want to take fish oil, there are several alternatives: (1) Algae-based omega-3 supplements (algal oil) provide EPA and DHA directly — algae is where fish get their omega-3s, so this is the original source and is suitable for vegans. (2) Flaxseed oil provides ALA, but the body converts only ~5–10% of ALA to EPA and even less to DHA — insufficient to correct a meaningful deficiency. (3) Chia seeds, walnuts, and hemp seeds provide ALA. For correcting documented low EPA/DHA levels, algal oil is the most effective non-fish option. Typical doses: 250–1,000 mg combined EPA+DHA/day.",
+      "source": "NIH ODS Omega-3 Consumer / PubMed",
+      "tags": ["omega3", "algal_oil", "fish_free", "vegan_omega3", "ala_conversion"]
+    },
+    {
+      "id": 127,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I have epilepsy and take valproate. I want to take evening primrose oil (GLA omega-6) for PMS. Is this safe?",
+      "answer": "Evening primrose oil and valproate is a combination to approach with great caution. Evening primrose oil (EPO) contains gamma-linolenic acid (GLA) and has been associated with lowering the seizure threshold — there are reports of seizures in people on epilepsy medications who took EPO, and valproate's metabolism may interact with fatty acid supplementation. This combination is classified as potentially risky in drug interaction databases. You must consult your neurologist before taking EPO. Safer alternatives for PMS symptoms (like magnesium or Vitamin B6) should be discussed first.",
+      "source": "Drugs.com / NCBI Bookshelf / PubMed",
+      "tags": ["epilepsy", "valproate", "evening_primrose_oil", "seizure_risk", "pms"]
+    },
+    {
+      "id": 128,
+      "type": "situational",
+      "category": "personalized_qa",
+      "question": "I bought a supplement that lists 1,000 mcg of Vitamin B12. The RDA is only 2.4 mcg — am I taking too much?",
+      "answer": "This is a common concern but generally not a safety issue. Vitamin B12 is water-soluble, meaning excess is excreted in urine and it does not accumulate to toxic levels like fat-soluble vitamins. The body can only absorb a limited amount via the intrinsic factor pathway (~1.5–2 mcg per dose), but additional B12 can be absorbed through passive diffusion. High oral doses (500–1,000 mcg) are intentionally used to overcome malabsorption — especially in older adults and those on metformin or PPIs. The NIH ODS does not list a Tolerable Upper Intake Level for B12 because no adverse effects have been observed from high oral doses. Taking 1,000 mcg is safe for most people.",
+      "source": "NIH ODS Vitamin B12 Fact Sheet",
+      "tags": ["vitamin_b12", "high_dose", "water_soluble", "safety", "malabsorption"]
+    },
+    {
+      "id": 129,
+      "type": "situational",
+      "category": "wellness_coaching",
+      "question": "I'm training for a powerlifting competition and a gym mate suggested I take 10 g of creatine per day. Is more creatine better for performance?",
+      "answer": "No — 10 g/day maintenance dose is not more effective than 3–5 g/day and only adds unnecessary cost and potential GI discomfort. The evidence supports: a loading phase of 20 g/day (split into 4 doses of 5 g) for 5–7 days to rapidly saturate muscles, followed by a maintenance dose of 3–5 g/day. Muscle creatine stores plateau after loading — additional creatine beyond saturation is simply excreted. The ISSN confirms long-term use at recommended doses is safe for healthy adults. Stay hydrated and ensure your protein intake is adequate.",
+      "source": "ISSN Position Stand on Creatine / PubMed",
+      "tags": ["creatine", "powerlifting", "maintenance_dose", "loading", "efficacy"]
+    },
+    {
+      "id": 130,
+      "type": "situational",
+      "category": "safety_checks",
+      "question": "I'm going on a weight-loss program and my coach suggested I take a fat burner supplement containing synephrine, caffeine, and green tea extract. Is this safe?",
+      "answer": "This combination warrants careful evaluation. Synephrine (bitter orange extract) combined with high-dose caffeine has been linked to elevated blood pressure, heart rate, arrhythmias, and in rare cases, serious cardiovascular events — especially in those with underlying heart conditions. Green tea extract at high doses (in concentrated supplement form, not tea) has been linked to liver toxicity. The FDA has previously taken action against supplements with similar stimulant combinations. This combination is particularly risky for people with cardiovascular disease, hypertension, or those who consume caffeine from other sources. Consult your physician before use.",
+      "source": "NIH NCCIH / FDA / Pharmacy Times",
+      "tags": ["fat_burner", "synephrine", "caffeine", "cardiovascular_risk", "weight_loss"]
+    }
+  ]
+}

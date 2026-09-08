@@ -1,0 +1,6 @@
+{
+  "embedding_model": "text-embedding-3-small",
+  "use_openai": true,
+  "dimensions": 1536,
+  "total_supplements": 3841
+}

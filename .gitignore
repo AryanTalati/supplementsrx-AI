@@ -1,0 +1,4 @@
+scrapers/data/
+*.html
+.env
+__pycache__/

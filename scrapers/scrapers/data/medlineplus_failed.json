@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Calcium",
+    "url": "https://ods.od.nih.gov/factsheets/Calcium-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Chromium",
+    "url": "https://ods.od.nih.gov/factsheets/Chromium-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Folate",
+    "url": "https://ods.od.nih.gov/factsheets/Folate-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Iodine",
+    "url": "https://ods.od.nih.gov/factsheets/Iodine-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Iron",
+    "url": "https://ods.od.nih.gov/factsheets/Iron-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Magnesium",
+    "url": "https://ods.od.nih.gov/factsheets/Magnesium-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Manganese",
+    "url": "https://ods.od.nih.gov/factsheets/Manganese-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Niacin",
+    "url": "https://ods.od.nih.gov/factsheets/Niacin-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Riboflavin",
+    "url": "https://ods.od.nih.gov/factsheets/Riboflavin-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Selenium",
+    "url": "https://ods.od.nih.gov/factsheets/Selenium-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Thiamin",
+    "url": "https://ods.od.nih.gov/factsheets/Thiamin-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Vitamin B12",
+    "url": "https://ods.od.nih.gov/factsheets/VitaminB12-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Vitamin B6",
+    "url": "https://ods.od.nih.gov/factsheets/VitaminB6-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Vitamin C",
+    "url": "https://ods.od.nih.gov/factsheets/VitaminC-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Vitamin D",
+    "url": "https://ods.od.nih.gov/factsheets/VitaminD-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Vitamin E",
+    "url": "https://ods.od.nih.gov/factsheets/VitaminE-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Vitamin K",
+    "url": "https://ods.od.nih.gov/factsheets/VitaminK-Consumer/",
+    "type": "supplement"
+  },
+  {
+    "name": "Zinc",
+    "url": "https://ods.od.nih.gov/factsheets/Zinc-Consumer/",
+    "type": "supplement"
+  }
+]

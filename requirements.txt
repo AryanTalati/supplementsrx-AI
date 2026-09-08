@@ -1,0 +1,36 @@
+# SupplementsRx AI — Python Requirements
+# Install with: pip install -r requirements.txt
+
+# ── Web Framework ─────────────────────────────────────────────
+fastapi==0.115.0
+uvicorn==0.30.0
+pydantic==2.12.5
+
+# ── OpenAI + LangChain ────────────────────────────────────────
+openai>=1.24.0
+langchain-openai>=0.1.6
+langchain-core>=0.1.52
+langchain>=0.1.20
+langchain-community>=0.0.38
+
+# ── Vector Search ─────────────────────────────────────────────
+faiss-cpu>=1.7.4
+numpy>=1.26.0
+
+# ── Neo4j ─────────────────────────────────────────────────────
+neo4j>=5.14.0
+
+# ── LangGraph Pipeline ────────────────────────────────────────
+langgraph>=0.1.0
+
+# ── Environment ───────────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Evaluation ────────────────────────────────────────────────
+ragas==0.4.3
+datasets>=2.14.0
+
+# ── Data Collection (scrapers only) ───────────────────────────
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+tqdm>=4.66.0
