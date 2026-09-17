@@ -92,7 +92,7 @@ Evaluated on 130-question SupplementRx-Bench dataset across 5 categories.
 ## Project Structure
 
 ```
-CSE-573_26-Semantic-Web-Mininig/
+supplementsrx-AI/
 ├── Knowledge_Graph/
 │   ├── phase2_knowledge_graph.py      # Build graph from merged CSV
 │   ├── migrate_to_neo4j.py            # Load graph to Neo4j AuraDB
@@ -139,10 +139,8 @@ CSE-573_26-Semantic-Web-Mininig/
 - Neo4j AuraDB free instance ([console.neo4j.io](https://console.neo4j.io))
 
 ### 1. Clone the repository
-```bash
 git clone https://github.com/your-team/CSE-573_26-Semantic-Web-Mininig.git
 cd CSE-573_26-Semantic-Web-Mininig
-```
 
 ### 2. Create virtual environment
 ```bash
