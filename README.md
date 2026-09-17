@@ -4,6 +4,12 @@
 **Arizona State University — CSE 573 Semantic Web Mining — Spring 2026**  
 **Group 3:** Shivam Sibal · Priyanshu Gupta · Pranay Reddy Palle · Aryan Talati · Divyesh Jain · Omkar Deshpande
 
+
+> **Note on attribution:** This was a six-person course project and the
+> role split below was a rough planning division, not a record of who
+> wrote what. In practice everyone worked across the stack. My own work
+> centred on the retrieval pipeline, LangGraph query routing, evidence
+> fusion, and the RAGAS evaluation harness. — Aryan Talati
 ---
 
 ## Overview
@@ -225,14 +231,12 @@ python evaluate.py
 
 ## Team
 
-| Member | Role |
-|--------|------|
-| Shivam Sibal | Data Engineering, RAG pipeline |
-| Priyanshu Gupta | KG Architecture, LangGraph pipeline, AuraDB |
-| Pranay Reddy Palle | Clustering, Evaluation |
-| Aryan Talati | NLU, Retrieval fusion |
-| Divyesh Jain | Safety layer, Benchmarks |
-| Omkar Deshpande | Frontend UI, API integration |
+Arizona State University — CSE 573 Semantic Web Mining — Spring 2026, Group 3
+
+Shivam Sibal · Priyanshu Gupta · Pranay Reddy Palle · Aryan Talati · Divyesh Jain · Omkar Deshpande
+
+All six members contributed across data collection, graph construction,
+retrieval, evaluation, and the frontend.
 
 ---
 
