@@ -26,7 +26,8 @@ import json
 import re
 import numpy as np
 from typing import TypedDict, Literal, List, Optional
-from neo4j import GraphDatabase
+
+from graph_backend import create_graph_backend
 
 try:
     import faiss
@@ -42,23 +43,40 @@ except ImportError:
 
 from openai import OpenAI
 
-# ── Config ────────────────────────────────────────────────────
-NEO4J_URI      = "neo4j+s://8976bb7e.databases.neo4j.io"
-NEO4J_USER     = "8976bb7e"
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "")
+# ── Config (env vars; Neo4j is optional — see graph_backend.py) ──
+# NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD are read by create_graph_backend().
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
-FAISS_INDEX    = "faiss_index.bin"
-NAMES_FILE     = "supplement_names.json"
-METADATA_FILE  = "supplement_metadata.json"
-CONFIG_FILE    = "embedding_config.json"
-COMMUNITIES_FILE = "neo4j_communities.json"
+# Data paths resolve relative to this file, not the working directory.
+_HERE          = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR       = os.environ.get("SUPPLEMENTSRX_DATA_DIR", _HERE)
+_KG_DIR        = os.path.join(_HERE, "..", "Knowledge_Graph")
+
+FAISS_INDEX    = os.path.join(DATA_DIR, "faiss_index.bin")
+NAMES_FILE     = os.path.join(DATA_DIR, "supplement_names.json")
+METADATA_FILE  = os.path.join(DATA_DIR, "supplement_metadata.json")
+CONFIG_FILE    = os.path.join(DATA_DIR, "embedding_config.json")
+GRAPH_FILE       = os.environ.get("GRAPH_JSON_PATH",
+                                  os.path.join(_KG_DIR, "graph.json"))
+COMMUNITIES_FILE = os.environ.get("COMMUNITIES_JSON_PATH",
+                                  os.path.join(_KG_DIR, "neo4j_communities.json"))
 
 TOP_K_FAISS    = 10   # top K from vector search
 TOP_K_RERANK   = 6    # top K after reranking
 MAX_HOPS       = 2    # Neo4j graph traversal hops
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+class _LazyOpenAI:
+    """Builds the OpenAI client on first use, so importing this module works
+    without a key (the SDK refuses to construct a client without one)."""
+    _client = None
+
+    def __getattr__(self, name):
+        if self._client is None:
+            self._client = OpenAI(api_key=OPENAI_API_KEY or None)
+        return getattr(self._client, name)
+
+
+client = _LazyOpenAI()
 
 
 #═══════════════════════════════════════════════════════════════
@@ -101,18 +119,13 @@ def load_resources():
         with open(COMMUNITIES_FILE) as f:
             communities = json.load(f)
 
-    # Neo4j driver
-    try:
-        driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-        driver.verify_connectivity()
-    except Exception:
-        print("❌ Neo4j is not running!")
-        print("   Open Neo4j Desktop → click Start on supplementsrx database")
-        exit()
+    # Graph backend: Neo4j if configured + reachable, else in-memory graph.json
+    driver = create_graph_backend(GRAPH_FILE, communities)
 
     print(f"   FAISS: {index.ntotal:,} vectors")
     print(f"   Metadata: {len(metadata):,} supplements")
     print(f"   Embedding model: {config['embedding_model']}")
+    print(f"   Graph backend: {driver.name}")
     print("   Ready!\n")
 
     return index, names, metadata, config, communities, driver
@@ -257,25 +270,17 @@ def global_search(state: AgentState,
 
     # Fetch community summaries from Neo4j
     # Fetch community summaries from supplement data directly
+    # (graph_backend.COMMUNITY_QUERY on Neo4j, or its in-memory equivalent)
     summaries = []
-    with driver.session() as session:
-        for comm_id in list(top_communities)[:5]:
-            result = list(session.run("""
-                MATCH (s:Supplement {louvain_community: $cid})-[:TREATS]->(c:Condition)
-                WITH s.louvain_community AS community,
-                    collect(DISTINCT c.name)[0..3] AS conditions,
-                    collect(DISTINCT s.name)[0..3] AS members
-                RETURN community, conditions, members
-                LIMIT 1
-            """, cid=comm_id))
-            if result:
-                r = result[0]
-                summary = (
-                    f"Community {r['community']} | "
-                    f"Conditions: {', '.join(r['conditions'] or [])} | "
-                    f"Examples: {', '.join(r['members'] or [])}"
-                )
-                summaries.append(summary)
+    for comm_id in list(top_communities)[:5]:
+        r = driver.community_summary(comm_id)
+        if r:
+            summary = (
+                f"Community {r['community']} | "
+                f"Conditions: {', '.join(r['conditions'] or [])} | "
+                f"Examples: {', '.join(r['members'] or [])}"
+            )
+            summaries.append(summary)
 
     print(f"   [Global] {len(faiss_results)} FAISS results, "
           f"{len(summaries)} community summaries")
@@ -333,48 +338,21 @@ def local_search(state: AgentState,
     graph_results = []
     search_names  = entities if entities else [r["name"] for r in faiss_results[:3]]
 
-    with driver.session() as session:
-        for entity_name in search_names[:5]:
-            result = list(session.run("""
-                MATCH (s:Supplement)
-                WHERE toLower(s.name) CONTAINS toLower($name)
-                    OR toLower($name) CONTAINS toLower(s.name)
-                    OR s.name =~ ('(?i).*' + $name + '.*')
-                WITH s ORDER BY
-                    CASE WHEN toLower(s.name) = toLower($name) THEN 0
-                        WHEN toLower(s.name) STARTS WITH toLower($name) THEN 1
-                        ELSE 2 END,
-                    size(s.name) ASC
-                LIMIT 3
-                OPTIONAL MATCH (s)-[:TREATS]->(c:Condition)
-                OPTIONAL MATCH (s)-[:INTERACTS_WITH]->(d:Drug)
-                OPTIONAL MATCH (s)-[:HAS_SIDE_EFFECT]->(se:SideEffect)
-                OPTIONAL MATCH (s)-[:BELONGS_TO_CLASS]->(sc:SupplementClass)
-                OPTIONAL MATCH (s)-[:SIMILAR_TO]->(s2:Supplement)
-                RETURN s.name                               AS name,
-                       s.overview                           AS overview,
-                       s.pregnancy                          AS pregnancy,
-                       s.scientific                         AS scientific,
-                       collect(DISTINCT c.name)[0..8]  AS conditions,
-                       collect(DISTINCT d.name)[0..8]  AS drugs,
-                       collect(DISTINCT se.name)[0..5] AS side_effects,
-                       collect(DISTINCT sc.name)[0..3] AS classes,
-                       collect(DISTINCT s2.name)[0..5] AS similar
-            """, name=entity_name))
-
-            for r in result:
-                graph_results.append({
-                    "name":        r["name"],
-                    "overview":    r["overview"] or "",
-                    "pregnancy":   r["pregnancy"] or "",
-                    "scientific":  r["scientific"] or "",
-                    "conditions":  r["conditions"] or [],
-                    "drugs":       r["drugs"] or [],
-                    "side_effects": r["side_effects"] or [],
-                    "classes":     r["classes"] or [],
-                    "similar":     r["similar"] or [],
-                    "source":      "neo4j_2hop"
-                })
+    # (graph_backend.LOCAL_QUERY on Neo4j, or its in-memory equivalent)
+    for entity_name in search_names[:5]:
+        for r in driver.local_lookup(entity_name):
+            graph_results.append({
+                "name":        r["name"],
+                "overview":    r["overview"] or "",
+                "pregnancy":   r["pregnancy"] or "",
+                "scientific":  r["scientific"] or "",
+                "conditions":  r["conditions"] or [],
+                "drugs":       r["drugs"] or [],
+                "side_effects": r["side_effects"] or [],
+                "classes":     r["classes"] or [],
+                "similar":     r["similar"] or [],
+                "source":      "neo4j_2hop"
+            })
 
     print(f"   [Local] {len(faiss_results)} FAISS + "
           f"{len(graph_results)} Neo4j graph results")
@@ -789,6 +767,10 @@ def build_graph(index, names, metadata, config, communities, driver):
 # Global pipeline instance
 _pipeline = None
 _resources = None
+
+def graph_backend_name() -> Optional[str]:
+    """Name of the active graph backend ("neo4j" / "in-memory"), or None."""
+    return _resources[5].name if _resources else None
 
 def initialize():
     global _pipeline, _resources

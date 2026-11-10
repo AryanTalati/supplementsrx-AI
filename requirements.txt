@@ -1,36 +1,21 @@
-# SupplementsRx AI — Python Requirements
-# Install with: pip install -r requirements.txt
+# SupplementsRx AI — runtime requirements (what the FastAPI server needs).
+# Evaluation and scraper dependencies live in requirements-dev.txt.
 
-# ── Web Framework ─────────────────────────────────────────────
+# ── Web server ────────────────────────────────────────────────
 fastapi==0.115.0
-uvicorn==0.30.0
-pydantic==2.12.5
+uvicorn==0.54.0
+pydantic==2.14.3
+python-dotenv==1.2.4
 
-# ── OpenAI + LangChain ────────────────────────────────────────
-openai>=1.24.0
-langchain-openai>=0.1.6
-langchain-core>=0.1.52
-langchain>=0.1.20
-langchain-community>=0.0.38
+# ── LLM + pipeline ────────────────────────────────────────────
+openai==3.49.0
+langchain-core==1.7.7
+langchain-openai==1.7.4
+langgraph==1.2.20
 
-# ── Vector Search ─────────────────────────────────────────────
-faiss-cpu>=1.7.4
-numpy>=1.26.0
+# ── Retrieval ─────────────────────────────────────────────────
+faiss-cpu==1.16.0
+numpy==2.5.4
 
-# ── Neo4j ─────────────────────────────────────────────────────
-neo4j>=5.14.0
-
-# ── LangGraph Pipeline ────────────────────────────────────────
-langgraph>=0.1.0
-
-# ── Environment ───────────────────────────────────────────────
-python-dotenv>=1.0.0
-
-# ── Evaluation ────────────────────────────────────────────────
-ragas==0.4.3
-datasets>=2.14.0
-
-# ── Data Collection (scrapers only) ───────────────────────────
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-tqdm>=4.66.0
+# ── Graph (optional at runtime: used only if NEO4J_URI/NEO4J_PASSWORD are set) ──
+neo4j==6.4.1

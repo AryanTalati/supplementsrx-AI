@@ -1,4 +1,5 @@
 scrapers/data/
 *.html
+!/Phase 5 RAG&Frontend/index.html
 .env
 __pycache__/

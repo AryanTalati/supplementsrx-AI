@@ -1,0 +1,9 @@
+.git
+**/.env
+**/__pycache__
+scrapers
+Phase 3
+**/*.npy
+**/*.png
+Knowledge_Graph/*.graphml
+Knowledge_Graph/*.csv

@@ -20,7 +20,7 @@ import faiss
 import time
 import re as _re
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 from langchain_openai import ChatOpenAI
@@ -34,10 +34,13 @@ from pydantic import Field
 # CONFIG — update your key and paths here
 # ─────────────────────────────────────────────
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-FAISS_INDEX_PATH = "faiss_index.bin"
-NAMES_PATH       = "supplement_names.json"
-METADATA_PATH    = "supplement_metadata.json"
-CONFIG_PATH      = "embedding_config.json"
+# Data paths resolve relative to this file, not the working directory.
+_DATA_DIR        = os.environ.get("SUPPLEMENTSRX_DATA_DIR",
+                                  os.path.dirname(os.path.abspath(__file__)))
+FAISS_INDEX_PATH = os.path.join(_DATA_DIR, "faiss_index.bin")
+NAMES_PATH       = os.path.join(_DATA_DIR, "supplement_names.json")
+METADATA_PATH    = os.path.join(_DATA_DIR, "supplement_metadata.json")
+CONFIG_PATH      = os.path.join(_DATA_DIR, "embedding_config.json")
 TOP_K            = 10
 
 
@@ -409,23 +412,56 @@ YOUR RESPONSE (warm, human, a real doctor talking to a real patient):"""
 # ─────────────────────────────────────────────
 # BUILD LLM
 # ─────────────────────────────────────────────
-llm = ChatOpenAI(
-    openai_api_key=OPENAI_API_KEY,
-    model="gpt-4o-mini", #gpt-3.5-turbo, gpt-4o-mini
-    temperature=0.3
-)
+class _LazyLLM:
+    """Builds ChatOpenAI on first use, so the server can start (and report
+    itself unconfigured on /health) before OPENAI_API_KEY is set."""
+    _llm = None
+
+    def __getattr__(self, name):
+        if self._llm is None:
+            self._llm = ChatOpenAI(
+                openai_api_key=OPENAI_API_KEY,
+                model="gpt-4o-mini", #gpt-3.5-turbo, gpt-4o-mini
+                temperature=0.3
+            )
+        return getattr(self._llm, name)
+
+
+llm = _LazyLLM()
 
 retriever = FAISSGraphRetriever(top_k=TOP_K)
 
-# Simple in-memory conversation history (replaces ConversationBufferMemory)
-chat_history: List = []
-last_clarification: dict = {}
+# Per-client state, keyed by a session key (main.py passes the client IP;
+# CLI / eval callers use the default key). A shared server must not let one
+# visitor's "yes" resolve another visitor's clarification.
+_DEFAULT_SESSION  = "_default"
+_MAX_SESSIONS     = 2000
+CLARIFICATION_TTL = 60  # seconds
+_chat_histories: Dict[str, List] = {}
+_clarifications: Dict[str, dict] = {}
+
+
+def _bounded_get(store: Dict[str, object], key: str, factory):
+    """Get/create a per-session entry, evicting the oldest when full."""
+    if key not in store:
+        while len(store) >= _MAX_SESSIONS:
+            store.pop(next(iter(store)))
+        store[key] = factory()
+    return store[key]
+
+
+def _expire_clarifications():
+    now = time.time()
+    for k in [k for k, v in _clarifications.items()
+              if now - v.get("timestamp", 0) > CLARIFICATION_TTL]:
+        _clarifications.pop(k, None)
 
 
 # ─────────────────────────────────────────────
 # CORE QA FUNCTION (replaces ConversationalRetrievalChain)
 # ─────────────────────────────────────────────
-def run_qa(question: str) -> str:
+def run_qa(question: str, session_key: str = _DEFAULT_SESSION) -> str:
+    chat_history = _bounded_get(_chat_histories, session_key, list)
     # 1. Retrieve relevant documents via FAISS
     docs = retriever._get_relevant_documents(question)
     context = "\n\n".join(doc.page_content for doc in docs)
@@ -455,8 +491,7 @@ def run_qa(question: str) -> str:
 
     # Keep history manageable
     if len(chat_history) > 20:
-        chat_history.clear()
-        chat_history.extend(chat_history[-20:])
+        del chat_history[:-20]
 
     return answer
 
@@ -495,41 +530,68 @@ def run_qa(question: str) -> str:
 #         print(f"RAG error: {e}")
 #         return "Something went wrong on my end — please try asking again."
 
-def rag(question: str) -> str:
-    global last_clarification
+def _langgraph_route(result: dict) -> dict:
+    """Route metadata from a Phase 4 LangGraph result."""
+    return {
+        "intent":        result.get("intent"),
+        "entities":      result.get("entities") or [],
+        "safety_alerts": result.get("safety_alerts") or [],
+        "confidence":    result.get("confidence"),
+    }
+
+
+def pipeline_status() -> dict:
+    """What is loaded — used by main.py's /health."""
+    backend = None
+    if _langgraph_available:
+        try:
+            from phase4_langgraph import graph_backend_name
+            backend = graph_backend_name()
+        except Exception:
+            pass
+    return {"langgraph": _langgraph_available, "graph_backend": backend,
+            "supplements": len(supplement_names)}
+
+
+def rag_with_meta(question: str, session_key: Optional[str] = None) -> dict:
+    """
+    Answer a question. Returns {"answer": str, "route": dict | None};
+    "route" holds intent / entities / safety_alerts / confidence when the
+    LangGraph pipeline produced the answer, else None.
+    """
+    key = session_key or _DEFAULT_SESSION
     try:
-        # Clear clarification if older than 60 seconds
-        if last_clarification and time.time() - last_clarification.get("timestamp", 0) > 60:
-            print("   [Clarification expired]")
-            last_clarification.clear()
+        _expire_clarifications()
+        pending = _clarifications.get(key)
 
         if is_farewell(question):
-            last_clarification.clear()
+            _clarifications.pop(key, None)
             import random
-            return random.choice(FAREWELL_RESPONSES)
+            return {"answer": random.choice(FAREWELL_RESPONSES), "route": None}
 
         # If user confirmed a clarification
         if is_continuation(question):
-            if last_clarification:
-                actual_query = f"tell me about {last_clarification['suggested']}"
+            if pending:
+                actual_query = f"tell me about {pending['suggested']}"
                 print(f"   [Clarification resolved] '{question}' → '{actual_query}'")
-                last_clarification.clear()
+                _clarifications.pop(key, None)
                 if _langgraph_available and _langgraph_ask:
                     result = _langgraph_ask(actual_query)
-                    return result.get("response", "")
-                return run_qa(actual_query)
-            return CONTINUATION_RESPONSE
+                    return {"answer": result.get("response", ""),
+                            "route": _langgraph_route(result)}
+                return {"answer": run_qa(actual_query, key), "route": None}
+            return {"answer": CONTINUATION_RESPONSE, "route": None}
 
         if is_identity_question(question):
-            last_clarification.clear()
-            return IDENTITY_RESPONSE
+            _clarifications.pop(key, None)
+            return {"answer": IDENTITY_RESPONSE, "route": None}
 
         if is_out_of_scope(question):
-            last_clarification.clear()
-            return generate_out_of_scope_response(question, llm)
+            _clarifications.pop(key, None)
+            return {"answer": generate_out_of_scope_response(question, llm), "route": None}
 
         # New question — clear any stale clarification
-        last_clarification.clear()
+        _clarifications.pop(key, None)
 
         # Use Phase 4 LangGraph if available
         if _langgraph_available and _langgraph_ask:
@@ -539,20 +601,26 @@ def rag(question: str) -> str:
             # Detect if GPT asked a clarification question
             match = _re.search(r"[Dd]id you mean ([A-Za-z0-9\-\s]+)\?", response)
             if match:
-                last_clarification["suggested"] = match.group(1).strip()
-                last_clarification["original"]  = question
-                last_clarification["timestamp"] = time.time()
-                print(f"   [Clarification pending] → '{last_clarification['suggested']}'")
+                _bounded_get(_clarifications, key, dict).update(
+                    suggested=match.group(1).strip(), original=question,
+                    timestamp=time.time())
+                print(f"   [Clarification pending] → '{match.group(1).strip()}'")
 
-            return response
+            return {"answer": response, "route": _langgraph_route(result)}
 
-        answer = run_qa(question)
+        answer = run_qa(question, key)
         if answer:
-            return answer
-        return (
+            return {"answer": answer, "route": None}
+        return {"answer": (
             "Honestly, I don't have enough on that to give you a solid answer. "
             "Your doctor or a licensed nutritionist would be the right person to ask."
-        )
+        ), "route": None}
     except Exception as e:
-        print(f"RAG error: {e}")
-        return "Something went wrong on my end — please try asking again."
+        print(f"RAG error: {type(e).__name__}: {e}")
+        return {"answer": "Something went wrong on my end — please try asking again.",
+                "route": None}
+
+
+def rag(question: str) -> str:
+    """Original string-returning API (kept for scripts and backwards compatibility)."""
+    return rag_with_meta(question)["answer"]

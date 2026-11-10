@@ -1,3 +1,14 @@
+---
+title: SupplementsRx AI
+emoji: 🌿
+colorFrom: green
+colorTo: yellow
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: GraphRAG supplement Q&A demo (ASU CSE 573 project)
+---
+
 # SupplementsRx AI
 ### Evidence-Based Supplement Guidance via Adaptive GraphRAG
 
@@ -134,9 +145,11 @@ supplementsrx-AI/
 ## Setup & Run
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.11+
 - OpenAI API key ([platform.openai.com](https://platform.openai.com))
-- Neo4j AuraDB free instance ([console.neo4j.io](https://console.neo4j.io))
+- Optional: a Neo4j instance loaded with `migrate_to_neo4j.py`. Without one, the server
+  builds an in-memory copy of the graph from `Knowledge_Graph/graph.json` that runs the
+  same two graph lookups.
 
 ### 1. Clone the repository
 git clone https://github.com/your-team/CSE-573_26-Semantic-Web-Mininig.git
@@ -155,17 +168,24 @@ source venv/bin/activate
 
 ### 3. Install dependencies
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt        # server only
+pip install -r requirements-dev.txt    # + evaluation and scraper tools
 ```
 
 ### 4. Create .env file
-Create a `.env` file inside `Phase 5 RAG&Frontend/`:
+Create a `.env` file inside `Phase 5 RAG&Frontend/` (`main.py` loads it on startup;
+real environment variables take precedence):
 ```
 OPENAI_API_KEY=sk-your-openai-key-here
+
+# Optional — omit to use the in-memory graph
 NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=your-aura-password
 ```
+Other settings (all optional): `RATE_LIMIT_PER_MINUTE` (10), `RATE_LIMIT_PER_DAY` (60),
+`GLOBAL_DAILY_LIMIT` (500), `MAX_QUESTION_CHARS` (500), `TRUSTED_PROXY_HOPS` (1),
+`CORS_ORIGINS`, `LOG_LEVEL`. See the docstring in `main.py`.
 
 ### 5. Run the application
 ```bash
@@ -174,7 +194,16 @@ uvicorn main:app --reload --port 8000
 ```
 
 ### 6. Open browser
-Navigate to `http://127.0.0.1:8000`
+Navigate to `http://127.0.0.1:8000` (health check: `/health`)
+
+### Docker / Hugging Face Spaces
+The `Dockerfile` serves the app on port 7860 as a non-root user, which is the layout
+Hugging Face Spaces (Docker SDK) expects; the front matter at the top of this README
+configures the Space. Set `OPENAI_API_KEY` as a Space secret.
+```bash
+docker build -t supplementsrx .
+docker run -p 7860:7860 -e OPENAI_API_KEY=sk-... supplementsrx
+```
 
 ---
 
