@@ -72,14 +72,22 @@ SEMANTIC_EXTRA = 4    # FAISS hits added to local-path evidence
 CONDITION_TOP_K      = 6     # supplements per matched condition (global path)
 CONDITION_LINK_BONUS = 0.06  # score bonus per log(1 + documented relationships); tuned on 6 test questions
 
-# Never put forward as a recommendation for a condition (global path):
-# banned / not lawful as dietary-supplement ingredients, controlled
-# substances, or highly toxic. Asking about one directly still works.
+# Never suggested unprompted (condition lists, FAISS results, 2-hop
+# neighbours): banned / not lawful as dietary-supplement ingredients,
+# controlled substances, or poisonous plants. Supplements the user names
+# are still looked up, so asking about one directly still works.
 DO_NOT_RECOMMEND = {
-    "Ephedra", "1,3-Dmaa", "1,4-Dmaa", "1,3-Dmba", "Phenibut",
+    # banned / unlawful in supplements, controlled substances
+    "Ephedra", "1,3-Dmaa", "1,4-Dmaa", "1,3-Dmba", "1,4-Butanediol", "Phenibut",
     "Gamma-Hydroxybutyrate (Ghb)", "Delta-9-Tetrahydrocannabinol (Thc)",
-    "Delta-8-Tetrahydrocannabinol (Delta-8-Thc)", "Cannabis",
-    "Comfrey", "Aconite", "Chaparral", "Kratom", "Tianeptine",
+    "Delta-8-Tetrahydrocannabinol (Delta-8-Thc)", "Cannabis", "Kratom", "Tianeptine",
+    # toxic / poisonous plants and preparations
+    "Comfrey", "Aconite", "Chaparral", "Stavesacre", "Foxglove", "Oleander",
+    "Nux Vomica", "Calabar Bean", "Gelsemium", "European Mandrake", "Datura Wrightii",
+    "Fly Agaric Mushroom", "Pennyroyal", "Sassafras", "Germander", "Tansy Ragwort",
+    "Alpine Ragwort", "Golden Ragwort", "Colocynth", "Bittersweet Nightshade",
+    "Herb Paris", "Savin Tops", "Chenopodium Oil", "Wormseed", "Mercury Herb",
+    "Hemp Agrimony", "Mountain Flax", "Euphorbia Cyparissias", "Dusty Miller",
 }
 
 # Global path: words in a question -> Condition nodes in the knowledge graph.
@@ -339,6 +347,9 @@ def global_search(state: AgentState,
             if m.get("community") is not None:
                 top_communities.add(m["community"])
 
+    faiss_results = [r for r in faiss_results if r["name"] not in DO_NOT_RECOMMEND]
+    top_communities = {r["community"] for r in faiss_results if r.get("community") is not None}
+
     # Fetch community summaries from Neo4j
     # Fetch community summaries from supplement data directly
     # (graph_backend.COMMUNITY_QUERY on Neo4j, or its in-memory equivalent)
@@ -463,7 +474,8 @@ def local_search(state: AgentState,
             })
 
     faiss_results = [r for r in faiss_results
-                     if (r.get("overview") or r.get("conditions"))]
+                     if (r.get("overview") or r.get("conditions"))
+                     and r["name"] not in DO_NOT_RECOMMEND]
                      #and r.get("score", 0) > 0.3]
 
     # ── Graph traversal, hop 1 ────────────────────────────────
@@ -486,7 +498,8 @@ def local_search(state: AgentState,
     related_results = []
     for seed in primary_graph_results(graph_results)[:HOP2_SEEDS]:
         for r in driver.two_hop(seed["name"], HOP2_PER_SEED):
-            if r["name"] in seen or len(related_results) >= HOP2_MAX:
+            if (r["name"] in seen or r["name"] in DO_NOT_RECOMMEND
+                    or len(related_results) >= HOP2_MAX):
                 continue
             seen.add(r["name"])
             related_results.append({**r, "via": seed["name"]})
@@ -708,8 +721,10 @@ def fuse_evidence(state: AgentState) -> AgentState:
                 if g.get("overview"):
                     parts.append(f"  {g['overview'][:150]}")
                 parts.append("")
-    elif faiss_results:
-        # ── Global path (no graph results): unchanged ──
+    elif faiss_results and not condition_results:
+        # ── Global path with no matched condition: FAISS evidence as before ──
+        # (when a condition matched, its graph-linked supplements, already
+        # ranked by similarity to the question, replace these FAISS lists)
         parts.append("=== SEMANTIC SEARCH RESULTS ===")
         for r in faiss_results[:TOP_K_RERANK]:
             parts.append(f"[{r['name']}] similarity={r['score']:.3f}")
