@@ -7,6 +7,8 @@ Two interchangeable backends expose the lookups used by phase4_langgraph.py:
   supplements_by_name(names) -> the same neighbourhood for exact names (FAISS seeds)
   two_hop(name, k)           -> k most similar Supplements (SIMILAR_TO by weight)
                                 with their interactions / side effects / conditions
+  condition_supplements(cs)  -> non-clinical Supplements that TREAT any of the
+                                given Conditions, with their link counts
   community_summary(cid)     -> conditions/members summary for a Louvain community
 
 Neo4jGraphBackend runs the original Cypher. InMemoryGraphBackend reproduces
@@ -119,6 +121,17 @@ TWO_HOP_QUERY = """
                        collect(DISTINCT c.name)[0..3]   AS conditions
                 ORDER BY weight DESC, name ASC
             """
+# Supplements linked to given conditions (global path), excluding MIMIC-IV
+# clinical drugs that were loaded with the Supplement label. `links` counts
+# the supplement's documented (non-SIMILAR_TO) relationships.
+CONDITION_QUERY = """
+                MATCH (s:Supplement)-[:TREATS]->(c:Condition)
+                WHERE c.name IN $conditions
+                  AND NOT coalesce(s.source_url, '') CONTAINS 'physionet.org'
+                WITH s, collect(DISTINCT c.name) AS matched
+                RETURN s.name AS name, matched,
+                       size([(s)-[r]->() WHERE type(r) <> 'SIMILAR_TO' | r]) AS links
+            """
 TWO_HOP_MAX_K = 5
 TWO_HOP_FIELDS = ("name", "weight", "shared_conditions", "drugs",
                   "side_effects", "conditions")
@@ -154,6 +167,18 @@ class Neo4jGraphBackend:
         with self.driver.session() as session:
             return [{f: r[f] for f in TWO_HOP_FIELDS}
                     for r in session.run(TWO_HOP_QUERY, name=name, k=k)]
+
+    def condition_supplements(self, conditions: List[str]) -> List[dict]:
+        if not conditions:
+            return []
+        with self.driver.session() as session:
+            rows = [{"name": r["name"], "matched": list(r["matched"]), "links": r["links"]}
+                    for r in session.run(CONDITION_QUERY, conditions=list(conditions))]
+        return sorted(rows, key=lambda r: r["name"])
+
+    def condition_names(self) -> List[str]:
+        with self.driver.session() as session:
+            return [r["name"] for r in session.run("MATCH (c:Condition) RETURN c.name AS name")]
 
     def community_summary(self, cid) -> Optional[dict]:
         with self.driver.session() as session:
@@ -217,6 +242,7 @@ class InMemoryGraphBackend:
         canon: Dict[str, str] = {}          # share one str object per name
         supp_order: List[str] = []
         props: Dict[str, Tuple[str, str, str]] = {}
+        clinical = set()                    # source_url CONTAINS 'physionet.org'
 
         for node in data.get("nodes", []):
             nid = node.get("id", "")
@@ -233,6 +259,8 @@ class InMemoryGraphBackend:
                     node.get("pregnancy", "") or "",
                     node.get("scientific", "") or "",
                 )
+                if "physionet.org" in (node.get("source_url", "") or ""):
+                    clinical.add(nid)
 
         spec_index = {(rel, tgt): i for i, (rel, tgt, _) in enumerate(_NEIGHBOUR_SPECS)}
         full: Dict[str, Tuple[list, ...]] = {
@@ -240,6 +268,7 @@ class InMemoryGraphBackend:
         }
         seen = set()
         similar_w: Dict[str, List[Tuple[float, str, str]]] = {}
+        links: Dict[str, int] = {}          # non-SIMILAR_TO relationships per node
         for edge in data.get("edges", []):
             src, tgt = edge.get("source", ""), edge.get("target", "")
             if src not in labels or tgt not in labels:
@@ -250,6 +279,8 @@ class InMemoryGraphBackend:
             if key in seen:  # MERGE dedupes identical relationships
                 continue
             seen.add(key)
+            if rel != "SIMILAR_TO":
+                links[src] = links.get(src, 0) + 1
             if labels[src] != "Supplement":
                 continue
             i = spec_index.get((rel, labels[tgt]))
@@ -269,6 +300,18 @@ class InMemoryGraphBackend:
             for s, lst in similar_w.items()
         }
         del similar_w
+
+        # Condition -> non-clinical supplements that TREAT it (global path)
+        cond_members: Dict[str, List[str]] = {}
+        for sname in supp_order:
+            if sname in clinical:
+                continue
+            for c in full[sname][0]:
+                cond_members.setdefault(c, []).append(sname)
+        self._condition_members = {c: tuple(m) for c, m in cond_members.items()}
+        self._links = {sname: links.get(sname, 0) for sname in supp_order}
+        self._condition_names = tuple(n for n, lab in labels.items() if lab == "Condition")
+        del cond_members, links
 
         # Precompute community summaries before trimming neighbour lists.
         # Rows of MATCH (s {louvain_community})-[:TREATS]->(c:Condition) in
@@ -351,6 +394,18 @@ class InMemoryGraphBackend:
                 "conditions": list(conds[:3]),
             })
         return out
+
+    # ── supplements linked to conditions (global path) ────────
+    def condition_supplements(self, conditions: List[str]) -> List[dict]:
+        matched: Dict[str, List[str]] = {}
+        for c in dict.fromkeys(conditions or []):
+            for sname in self._condition_members.get(c, ()):
+                matched.setdefault(sname, []).append(c)
+        return [{"name": n, "matched": m, "links": self._links[n]}
+                for n, m in sorted(matched.items())]
+
+    def condition_names(self) -> List[str]:
+        return list(self._condition_names)
 
     # ── global community summary ──────────────────────────────
     def community_summary(self, cid) -> Optional[dict]:

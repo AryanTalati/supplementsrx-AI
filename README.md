@@ -39,7 +39,9 @@ Intent Classifier (GPT-4o-mini) → Global / Local / Out-of-Scope
 LOCAL  → Entity Extraction + FAISS Search → graph seeds (named entities + top vector hits)
          hop 1: conditions, drug interactions, side effects, classes, similar supplements
          hop 2: most similar supplements (SIMILAR_TO by weight) → their interactions / side effects
-GLOBAL → Community Summary Retrieval (Louvain clusters)
+GLOBAL → Condition lookup (e.g. "skin" → Skin Health): linked supplements ranked by
+         similarity to the question + how well documented they are; FAISS search;
+         Community Summary Retrieval (Louvain clusters)
 OOS    → Graceful warm decline
     ↓
 Safety Intercept Layer (rule-based)

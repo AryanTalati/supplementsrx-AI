@@ -23,6 +23,7 @@
 
 import os
 import json
+import math
 import re
 import numpy as np
 from typing import TypedDict, Literal, List, Optional
@@ -68,6 +69,67 @@ HOP2_PER_SEED  = 3    # most-similar neighbours expanded per seed (hop 2)
 HOP2_SEEDS     = 3    # seeds whose neighbours are expanded
 HOP2_MAX       = 6    # cap on 2-hop related supplements in the evidence
 SEMANTIC_EXTRA = 4    # FAISS hits added to local-path evidence
+CONDITION_TOP_K      = 6     # supplements per matched condition (global path)
+CONDITION_LINK_BONUS = 0.06  # score bonus per log(1 + documented relationships); tuned on 6 test questions
+
+# Never put forward as a recommendation for a condition (global path):
+# banned / not lawful as dietary-supplement ingredients, controlled
+# substances, or highly toxic. Asking about one directly still works.
+DO_NOT_RECOMMEND = {
+    "Ephedra", "1,3-Dmaa", "1,4-Dmaa", "1,3-Dmba", "Phenibut",
+    "Gamma-Hydroxybutyrate (Ghb)", "Delta-9-Tetrahydrocannabinol (Thc)",
+    "Delta-8-Tetrahydrocannabinol (Delta-8-Thc)", "Cannabis",
+    "Comfrey", "Aconite", "Chaparral", "Kratom", "Tianeptine",
+}
+
+# Global path: words in a question -> Condition nodes in the knowledge graph.
+# "word*" matches as a prefix ("depress*" -> depressed, depression);
+# plain words match whole (an optional trailing "s" is allowed).
+CONDITION_KEYWORDS = {
+    "Skin Health":                   ["skin", "acne", "eczema", "psoriasis", "wrinkle*", "complexion",
+                                      "dermat*", "rash", "scar", "sunburn", "wound*"],
+    "Hair & Nail Health":            ["hair", "nail", "alopecia", "bald*"],
+    "Sleep & Insomnia":              ["sleep*", "insomnia", "jet lag"],
+    "Anxiety & Stress":              ["anxi*", "stress*", "panic", "nervous*", "calm*"],
+    "Depression & Mood":             ["depress*", "mood", "low mood"],
+    "Cardiovascular Health":         ["heart", "cardio*", "cholesterol", "blood pressure", "hypertension",
+                                      "circulation", "arter*"],
+    "Cognitive Health":              ["memory", "focus", "cognit*", "brain", "concentration", "dementia",
+                                      "alzheimer*"],
+    "Energy & Fatigue":              ["energy", "fatigue*", "tired*", "exhaust*"],
+    "Immune Support":                ["immun*", "cold", "flu"],
+    "Digestive Health":              ["digest*", "gut", "stomach", "bloat*", "constipat*", "diarrh*",
+                                      "ibs", "bowel"],
+    "Bone & Joint Health":           ["bone", "joint", "arthritis", "osteopor*"],
+    "Pain & Inflammation":           ["pain*", "inflam*", "ache*"],
+    "Weight Management":             ["weight", "obes*", "appetite", "fat loss", "lose fat", "belly fat"],
+    "Blood Sugar Management":        ["blood sugar", "diabet*", "glucose", "insulin"],
+    "Liver & Detox":                 ["liver", "detox*"],
+    "Kidney Health":                 ["kidney", "renal"],
+    "Respiratory Health":            ["lung", "respirat*", "asthma", "breathing", "cough*"],
+    "Eye Health":                    ["eye", "vision", "macular"],
+    "Thyroid & Hormones":            ["thyroid", "hormon*"],
+    "Womens Health":                 ["women", "woman", "female", "menopaus*", "menstrua*", "pms"],
+    "Mens Health":                   ["men's health", "mens health", "prostate", "testosterone"],
+    "Sexual Health":                 ["sexual*", "libido", "erectile"],
+    "Sports & Athletic Performance": ["athlet*", "sport", "workout", "exercise", "muscle", "endurance"],
+    "Antioxidant & Anti-Aging":      ["antioxidant", "aging", "anti-aging", "longevity"],
+    "Allergy Relief":                ["allerg*", "hay fever"],
+    "Fever & Infection":             ["fever", "infection"],
+    "Cancer Support":                ["cancer", "tumor", "tumour", "chemo*"],
+}
+_CONDITION_PATTERNS = [
+    (cond, re.compile("|".join(
+        r"\b" + re.escape(k[:-1]) + r"\w*" if k.endswith("*")
+        else r"\b" + re.escape(k) + r"s?\b" for k in kws)))
+    for cond, kws in CONDITION_KEYWORDS.items()
+]
+
+
+def match_conditions(query: str, limit: int = 3) -> List[str]:
+    """Condition nodes named (by keyword) in a question, in keyword-map order."""
+    q = query.lower().replace("\u2019", "'")
+    return [cond for cond, rx in _CONDITION_PATTERNS if rx.search(q)][:limit]
 
 class _LazyOpenAI:
     """Builds the OpenAI client on first use, so importing this module works
@@ -94,6 +156,7 @@ class AgentState(TypedDict):
     faiss_results:  Optional[List[dict]]    # vector search results
     graph_results:  Optional[List[dict]]    # graph 1-hop results (entity + FAISS seeds)
     related_results: Optional[List[dict]]   # graph 2-hop results via SIMILAR_TO
+    condition_results: Optional[List[dict]] # global path: supplements linked to matched conditions
     community_summaries: Optional[List[str]]
     safety_alerts:  Optional[List[str]]
     evidence:       Optional[str]           # fused evidence block
@@ -126,6 +189,9 @@ def load_resources():
 
     # Graph backend: Neo4j if configured + reachable, else in-memory graph.json
     driver = create_graph_backend(GRAPH_FILE, communities)
+    missing = set(CONDITION_KEYWORDS) - set(driver.condition_names())
+    if missing:
+        print(f"   ⚠️  Condition keywords map to unknown conditions: {sorted(missing)}")
 
     print(f"   FAISS: {index.ntotal:,} vectors")
     print(f"   Metadata: {len(metadata):,} supplements")
@@ -287,11 +353,44 @@ def global_search(state: AgentState,
             )
             summaries.append(summary)
 
+    # Supplements linked in the graph to the condition(s) the question names,
+    # ranked by similarity to the question plus a small bonus for
+    # well-documented supplements (graph_backend.CONDITION_QUERY)
+    conditions = match_conditions(query)
+    condition_results = rank_condition_supplements(
+        conditions, q_emb[0], index, names, driver)
+
     print(f"   [Global] {len(faiss_results)} FAISS results, "
-          f"{len(summaries)} community summaries")
+          f"{len(summaries)} community summaries, "
+          f"conditions={conditions} -> {[r['name'] for r in condition_results]}")
     return {**state,
             "faiss_results": faiss_results,
-            "community_summaries": summaries}
+            "community_summaries": summaries,
+            "condition_results": condition_results}
+
+
+_name_rows: dict = {}
+
+def rank_condition_supplements(conditions, q_vec, index, names, driver,
+                               top_k: int = CONDITION_TOP_K) -> List[dict]:
+    if not conditions:
+        return []
+    if not _name_rows:
+        _name_rows.update({n: i for i, n in enumerate(names)})
+    cands = [c for c in driver.condition_supplements(conditions)
+             if c["name"] in _name_rows and c["name"] not in DO_NOT_RECOMMEND]
+    if not cands:
+        return []
+    vecs = np.vstack([index.reconstruct(_name_rows[c["name"]]) for c in cands])
+    sims = vecs @ np.asarray(q_vec, dtype=np.float32)
+    scored = sorted(
+        ((float(sim) + CONDITION_LINK_BONUS * math.log1p(c["links"]), float(sim), c)
+         for c, sim in zip(cands, sims)),
+        key=lambda t: (-t[0], t[2]["name"]))[:top_k]
+    records = {r["name"]: r for r in driver.supplements_by_name([c["name"] for _, _, c in scored])}
+    return [{**records[c["name"]], "matched": c["matched"], "links": c["links"],
+             "similarity": sim, "score": score}
+            for score, sim, c in scored if c["name"] in records]
 
 
 #═══════════════════════════════════════════════════════════════
@@ -555,6 +654,18 @@ def fuse_evidence(state: AgentState) -> AgentState:
             parts.append(f"• {s}")
         parts.append("")
 
+    condition_results = state.get("condition_results", []) or []
+    if condition_results:
+        conds = list(dict.fromkeys(m for r in condition_results for m in r["matched"]))
+        parts.append(f"=== KNOWLEDGE GRAPH: SUPPLEMENTS LINKED TO {' / '.join(conds).upper()} ===")
+        for r in condition_results:
+            parts.append(f"[{r['name']}]")
+            if r.get("overview"):
+                parts.append(f"  {r['overview'][:150]}")
+            if r.get("drugs"):
+                parts.append(f"  Interacts with: {', '.join(r['drugs'][:3])}")
+        parts.append("")
+
     if graph_results:
         # ── Local path: graph evidence for the named supplements ──
         parts.append("=== KNOWLEDGE GRAPH EVIDENCE ===")
@@ -625,7 +736,7 @@ def fuse_evidence(state: AgentState) -> AgentState:
     evidence = "\n".join(parts)
 
     # Compute confidence based on evidence quality
-    if primary and graph_has_content:
+    if (primary and graph_has_content) or condition_results:
         confidence = "High"
     elif faiss_results and len(faiss_results) >= 3:
         confidence = "Medium"
@@ -872,6 +983,7 @@ def ask(query: str) -> dict:
         "faiss_results":      None,
         "graph_results":      None,
         "related_results":    None,
+        "condition_results":  None,
         "community_summaries": None,
         "safety_alerts":      None,
         "evidence":           None,
