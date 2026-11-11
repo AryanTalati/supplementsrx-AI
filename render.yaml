@@ -11,3 +11,7 @@ services:
     envVars:
       - key: OPENAI_API_KEY
         sync: false        # Render asks for the value when the Blueprint is created
+      # Render serves through Cloudflare, which sets this header to the real
+      # client IP (client-sent values are overwritten); used for rate limits.
+      - key: CLIENT_IP_HEADER
+        value: cf-connecting-ip

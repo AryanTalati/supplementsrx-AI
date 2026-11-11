@@ -14,6 +14,9 @@ from the Space's secrets/variables.
   GLOBAL_DAILY_LIMIT    all clients combined, 24h            (default 500)
   MAX_QUESTION_CHARS    max question length                  (default 500)
   TRUSTED_PROXY_HOPS    reverse proxies in front of the app  (default 1)
+  CLIENT_IP_HEADER      header holding the client IP, set by a trusted edge
+                        proxy (e.g. cf-connecting-ip on Render/Cloudflare);
+                        only set this when that proxy always overwrites it
   CORS_ORIGINS          comma-separated origins allowed to call the API
                         cross-origin (default: none — the UI is same-origin)
   LOG_LEVEL             default INFO
@@ -57,6 +60,7 @@ RATE_LIMIT_PER_DAY    = _env_int("RATE_LIMIT_PER_DAY", 60)
 GLOBAL_DAILY_LIMIT    = _env_int("GLOBAL_DAILY_LIMIT", 500)
 MAX_QUESTION_CHARS    = _env_int("MAX_QUESTION_CHARS", 500)
 TRUSTED_PROXY_HOPS    = _env_int("TRUSTED_PROXY_HOPS", 1)
+CLIENT_IP_HEADER      = os.environ.get("CLIENT_IP_HEADER", "").strip().lower()
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 INDEX_HTML = os.path.join(BASE_DIR, "index.html")
 
@@ -130,10 +134,16 @@ limiter = RateLimiter(RATE_LIMIT_PER_MINUTE, RATE_LIMIT_PER_DAY, GLOBAL_DAILY_LI
 
 def client_ip(request: Request) -> str:
     """
-    Client address. Behind N trusted proxies, the client IP is the N-th entry
-    from the right of X-Forwarded-For; entries further left are set by the
-    client and can be spoofed, so they are ignored.
+    Client address. If CLIENT_IP_HEADER names a header set by a trusted edge
+    proxy (e.g. cf-connecting-ip behind Cloudflare), that is used. Otherwise,
+    behind N trusted proxies, the client IP is the N-th entry from the right
+    of X-Forwarded-For; entries further left are set by the client and can
+    be spoofed, so they are ignored.
     """
+    if CLIENT_IP_HEADER:
+        trusted = request.headers.get(CLIENT_IP_HEADER, "").strip()
+        if trusted:
+            return trusted
     xff = request.headers.get("x-forwarded-for", "")
     hops = [h.strip() for h in xff.split(",") if h.strip()]
     if TRUSTED_PROXY_HOPS > 0 and hops:
