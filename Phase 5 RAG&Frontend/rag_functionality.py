@@ -617,8 +617,30 @@ def rag_with_meta(question: str, session_key: Optional[str] = None) -> dict:
         ), "route": None}
     except Exception as e:
         print(f"RAG error: {type(e).__name__}: {e}")
-        return {"answer": "Something went wrong on my end — please try asking again.",
-                "route": None}
+        kind = classify_error(e)
+        return {"answer": ERROR_MESSAGES[kind], "route": None, "error": kind}
+
+
+ERROR_MESSAGES = {
+    "rate_limit":  "The demo has reached its usage limit for now — please try again later.",
+    "unavailable": "Couldn't reach the AI service right now — please try again in a moment.",
+    "internal":    "Something went wrong on my end — please try asking again.",
+}
+
+
+def classify_error(e: Exception) -> str:
+    """Map an exception (or what it wraps) to rate_limit / unavailable / internal."""
+    import openai
+    seen = set()
+    while e is not None and id(e) not in seen:
+        seen.add(id(e))
+        if isinstance(e, openai.RateLimitError):          # includes insufficient_quota
+            return "rate_limit"
+        if isinstance(e, (openai.APIConnectionError,      # includes APITimeoutError
+                          openai.InternalServerError)):
+            return "unavailable"
+        e = e.__cause__ or e.__context__
+    return "internal"
 
 
 def rag(question: str) -> str:

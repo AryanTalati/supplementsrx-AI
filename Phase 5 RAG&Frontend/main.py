@@ -200,6 +200,10 @@ def chat(message: Message, request: Request):
         return _error(429, msg, {"Retry-After": str(max(retry_after, 1))})
 
     result = rag_with_meta(question, session_key=ip)
+    if result.get("error") == "rate_limit":
+        return _error(429, result["answer"], {"Retry-After": "600"})
+    if result.get("error") == "unavailable":
+        return _error(503, result["answer"])
     answer, route = result["answer"], result["route"]
     payload = {"answer": answer}
     if route:
