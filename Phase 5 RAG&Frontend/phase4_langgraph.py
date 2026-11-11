@@ -86,7 +86,7 @@ DO_NOT_RECOMMEND = {
 # "word*" matches as a prefix ("depress*" -> depressed, depression);
 # plain words match whole (an optional trailing "s" is allowed).
 CONDITION_KEYWORDS = {
-    "Skin Health":                   ["skin", "acne", "eczema", "psoriasis", "wrinkle*", "complexion",
+    "Skin Health":                   ["skin", "skincare", "acne", "eczema", "psoriasis", "wrinkle*", "complexion",
                                       "dermat*", "rash", "scar", "sunburn", "wound*"],
     "Hair & Nail Health":            ["hair", "nail", "alopecia", "bald*"],
     "Sleep & Insomnia":              ["sleep*", "insomnia", "jet lag"],
