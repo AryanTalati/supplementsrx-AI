@@ -26,9 +26,18 @@ FILES=(
 
 git lfs version >/dev/null
 
+# Authenticate git (and git-lfs) with the token saved by `hf auth login`,
+# for this script only — nothing is written to git config.
+HF_TOKEN_FILE="${HF_TOKEN_PATH:-$HOME/.cache/huggingface/token}"
+GIT_AUTH=()
+if [ -f "$HF_TOKEN_FILE" ]; then
+  GIT_AUTH=(-c "credential.helper=" -c "credential.helper=!f() { test \"\$1\" = get && echo username=hf && echo \"password=\$(cat '$HF_TOKEN_FILE')\"; }; f")
+fi
+git_auth() { git ${GIT_AUTH[@]+"${GIT_AUTH[@]}"} "$@"; }
+
 rm -rf "$WORK"
 # Skip downloading LFS blobs from the Space; every tracked file is replaced below.
-GIT_LFS_SKIP_SMUDGE=1 git clone "https://huggingface.co/spaces/$SPACE_ID" "$WORK"
+GIT_LFS_SKIP_SMUDGE=1 git_auth clone "https://huggingface.co/spaces/$SPACE_ID" "$WORK"
 cd "$WORK"
 git lfs install --local >/dev/null
 
@@ -54,5 +63,5 @@ fi
 SRC_REV="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
 git commit -q -m "Deploy SupplementsRx demo (source ${SRC_REV})"
 echo "LFS-tracked files:"; git lfs ls-files
-git push origin HEAD:main
+git_auth push origin HEAD:main
 echo "Pushed to https://huggingface.co/spaces/$SPACE_ID"

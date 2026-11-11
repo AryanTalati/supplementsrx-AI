@@ -62,8 +62,12 @@ COMMUNITIES_FILE = os.environ.get("COMMUNITIES_JSON_PATH",
                                   os.path.join(_KG_DIR, "neo4j_communities.json"))
 
 TOP_K_FAISS    = 10   # top K from vector search
-TOP_K_RERANK   = 6    # top K after reranking
-MAX_HOPS       = 2    # Neo4j graph traversal hops
+TOP_K_RERANK   = 6    # max results per evidence section
+FAISS_SEEDS    = 3    # top FAISS hits that also seed the graph traversal
+HOP2_PER_SEED  = 3    # most-similar neighbours expanded per seed (hop 2)
+HOP2_SEEDS     = 3    # seeds whose neighbours are expanded
+HOP2_MAX       = 6    # cap on 2-hop related supplements in the evidence
+SEMANTIC_EXTRA = 4    # FAISS hits added to local-path evidence
 
 class _LazyOpenAI:
     """Builds the OpenAI client on first use, so importing this module works
@@ -88,7 +92,8 @@ class AgentState(TypedDict):
     intent:         Optional[str]           # global / local / oos
     entities:       Optional[List[str]]     # extracted supplement/drug names
     faiss_results:  Optional[List[dict]]    # vector search results
-    graph_results:  Optional[List[dict]]    # Neo4j subgraph results
+    graph_results:  Optional[List[dict]]    # graph 1-hop results (entity + FAISS seeds)
+    related_results: Optional[List[dict]]   # graph 2-hop results via SIMILAR_TO
     community_summaries: Optional[List[str]]
     safety_alerts:  Optional[List[str]]
     evidence:       Optional[str]           # fused evidence block
@@ -290,16 +295,44 @@ def global_search(state: AgentState,
 
 
 #═══════════════════════════════════════════════════════════════
-#  NODE 3B: LOCAL PATH — FAISS + Neo4j 2-hop Traversal
+#  NODE 3B: LOCAL PATH — FAISS + 2-hop graph traversal
 #═══════════════════════════════════════════════════════════════
+
+def _graph_record(r: dict, seed: str) -> dict:
+    return {
+        "name":        r["name"],
+        "overview":    r["overview"] or "",
+        "pregnancy":   r["pregnancy"] or "",
+        "scientific":  r["scientific"] or "",
+        "conditions":  r["conditions"] or [],
+        "drugs":       r["drugs"] or [],
+        "side_effects": r["side_effects"] or [],
+        "classes":     r["classes"] or [],
+        "similar":     r["similar"] or [],
+        "source":      "neo4j_2hop",
+        "seed":        seed,          # "entity" (named in the query) or "faiss"
+    }
+
+
+def primary_graph_results(graph_results: List[dict]) -> List[dict]:
+    """Results for what the user named; FAISS-seeded ones only if nothing was named."""
+    named = [r for r in graph_results if r.get("seed") == "entity"]
+    return named or graph_results
+
 
 def local_search(state: AgentState,
                  index, names, metadata, config, driver) -> AgentState:
     """
-    For specific queries: hybrid FAISS + Neo4j traversal.
+    For specific queries: FAISS vector search + graph traversal.
+      seeds  = supplements matching the extracted entities
+               + the top FAISS hits (by exact name)
+      hop 1  = each seed's conditions, drug interactions, side effects,
+               classes and similar supplements
+      hop 2  = the most similar supplements (SIMILAR_TO, by weight) of the
+               primary seeds, with their interactions / side effects / conditions
     """
     query    = state["query"]
-    entities = state.get("entities", [])
+    entities = state.get("entities") or []
 
     # ── FAISS vector search ───────────────────────────────────
     if config["use_openai"]:
@@ -334,36 +367,39 @@ def local_search(state: AgentState,
                      if (r.get("overview") or r.get("conditions"))]
                      #and r.get("score", 0) > 0.3]
 
-    # ── Neo4j 2-hop subgraph traversal ────────────────────────
+    # ── Graph traversal, hop 1 ────────────────────────────────
+    # Entity seeds: fuzzy name match (graph_backend.LOCAL_QUERY)
     graph_results = []
-    search_names  = entities if entities else [r["name"] for r in faiss_results[:3]]
-
-    # (graph_backend.LOCAL_QUERY on Neo4j, or its in-memory equivalent)
-    for entity_name in search_names[:5]:
+    seen = set()
+    for entity_name in entities[:5]:
         for r in driver.local_lookup(entity_name):
-            graph_results.append({
-                "name":        r["name"],
-                "overview":    r["overview"] or "",
-                "pregnancy":   r["pregnancy"] or "",
-                "scientific":  r["scientific"] or "",
-                "conditions":  r["conditions"] or [],
-                "drugs":       r["drugs"] or [],
-                "side_effects": r["side_effects"] or [],
-                "classes":     r["classes"] or [],
-                "similar":     r["similar"] or [],
-                "source":      "neo4j_2hop"
-            })
+            if r["name"] not in seen:
+                seen.add(r["name"])
+                graph_results.append(_graph_record(r, "entity"))
+
+    # FAISS seeds: top vector hits by exact name (graph_backend.BY_NAME_QUERY)
+    faiss_seeds = [r["name"] for r in faiss_results if r["name"] not in seen][:FAISS_SEEDS]
+    for r in driver.supplements_by_name(faiss_seeds):
+        seen.add(r["name"])
+        graph_results.append(_graph_record(r, "faiss"))
+
+    # ── Graph traversal, hop 2 (graph_backend.TWO_HOP_QUERY) ──
+    related_results = []
+    for seed in primary_graph_results(graph_results)[:HOP2_SEEDS]:
+        for r in driver.two_hop(seed["name"], HOP2_PER_SEED):
+            if r["name"] in seen or len(related_results) >= HOP2_MAX:
+                continue
+            seen.add(r["name"])
+            related_results.append({**r, "via": seed["name"]})
 
     print(f"   [Local] {len(faiss_results)} FAISS + "
-          f"{len(graph_results)} Neo4j graph results")
-    
-    # print(f"   [FAISS top 3] {[r['name'] for r in faiss_results[:3]]}") #Debug
-    # for r in faiss_results[:3]: #Debug
-    #     print(f"      {r['name']}: conditions={r.get('conditions', [])[:3]}") #Debug
+          f"{len(graph_results)} graph (hop 1) + "
+          f"{len(related_results)} related (hop 2)")
 
     return {**state,
             "faiss_results": faiss_results,
-            "graph_results": graph_results}
+            "graph_results": graph_results,
+            "related_results": related_results}
 
     
 
@@ -394,7 +430,9 @@ def safety_intercept(state: AgentState) -> AgentState:
     Checks: drug interactions, pregnancy risk, high dose warnings.
     """
     alerts       = []
-    graph_results = state.get("graph_results", []) or []
+    # Supplements the user named; FAISS-seeded graph results only when nothing
+    # was named (same set the safety layer saw before FAISS seeding existed).
+    graph_results = primary_graph_results(state.get("graph_results", []) or [])
     faiss_results = state.get("faiss_results", []) or []
     query         = state["query"].lower()
 
@@ -468,17 +506,39 @@ def safety_intercept(state: AgentState) -> AgentState:
 #  NODE 5: EVIDENCE FUSION
 #═══════════════════════════════════════════════════════════════
 
+def _graph_lines(r: dict) -> List[str]:
+    lines = [f"[{r.get('name', '')}]"]
+    if r.get("overview"):
+        lines.append(f"Overview: {r['overview'][:300]}")
+    if r.get("conditions"):
+        lines.append(f"Treats: {', '.join(r['conditions'][:6])}")
+    if r.get("drugs"):
+        lines.append(f"Interacts with: {', '.join(r['drugs'][:5])}")
+    if r.get("side_effects"):
+        lines.append(f"Side effects: {', '.join(r['side_effects'][:4])}")
+    if r.get("classes"):
+        lines.append(f"Class: {', '.join(r['classes'])}")
+    if r.get("pregnancy"):
+        lines.append(f"Pregnancy: {r['pregnancy'][:150]}")
+    if r.get("similar"):
+        lines.append(f"Similar supplements: {', '.join(r['similar'][:4])}")
+    lines.append("")
+    return lines
+
+
 def fuse_evidence(state: AgentState) -> AgentState:
-    """Combine FAISS + graph results into unified evidence block"""
+    """Combine graph (hop 1 + hop 2) and FAISS results into one evidence block"""
     parts          = []
     graph_results  = state.get("graph_results", []) or []
+    related        = state.get("related_results", []) or []
     faiss_results  = state.get("faiss_results", []) or []
     community_sums = state.get("community_summaries", []) or []
     safety_alerts  = state.get("safety_alerts", []) or []
 
+    primary = primary_graph_results(graph_results)
     graph_has_content = any(
-    r.get("overview") or r.get("conditions") or r.get("drugs")
-    for r in graph_results
+        r.get("overview") or r.get("conditions") or r.get("drugs")
+        for r in primary
     )
 
     # Add safety alerts first
@@ -495,30 +555,50 @@ def fuse_evidence(state: AgentState) -> AgentState:
             parts.append(f"• {s}")
         parts.append("")
 
-    # Add Neo4j graph evidence (most detailed)
     if graph_results:
+        # ── Local path: graph evidence for the named supplements ──
         parts.append("=== KNOWLEDGE GRAPH EVIDENCE ===")
-        for r in graph_results[:TOP_K_RERANK]:
-            name = r.get("name", "")
-            parts.append(f"[{name}]")
-            if r.get("overview"):
-                parts.append(f"Overview: {r['overview'][:300]}")
-            if r.get("conditions"):
-                parts.append(f"Treats: {', '.join(r['conditions'][:6])}")
-            if r.get("drugs"):
-                parts.append(f"Interacts with: {', '.join(r['drugs'][:5])}")
-            if r.get("side_effects"):
-                parts.append(f"Side effects: {', '.join(r['side_effects'][:4])}")
-            if r.get("classes"):
-                parts.append(f"Class: {', '.join(r['classes'])}")
-            if r.get("pregnancy"):
-                parts.append(f"Pregnancy: {r['pregnancy'][:150]}")
-            if r.get("similar"):
-                parts.append(f"Similar supplements: {', '.join(r['similar'][:4])}")
+        for r in primary[:TOP_K_RERANK]:
+            parts.extend(_graph_lines(r))
+
+        # 2-hop: most similar supplements and what they connect to
+        if related:
+            parts.append("=== RELATED SUPPLEMENTS (2-HOP, VIA SIMILARITY) ===")
+            for r in related[:HOP2_MAX]:
+                line = f"[{r['name']}] similar to {r['via']}"
+                if r.get("shared_conditions"):
+                    shared = [c.strip() for c in r["shared_conditions"].split(",")][:3]
+                    line += f" (shared: {', '.join(shared)})"
+                parts.append(line)
+                if r.get("conditions"):
+                    parts.append(f"  Treats: {', '.join(r['conditions'])}")
+                if r.get("drugs"):
+                    parts.append(f"  Interacts with: {', '.join(r['drugs'])}")
+                if r.get("side_effects"):
+                    parts.append(f"  Side effects: {', '.join(r['side_effects'])}")
             parts.append("")
 
-    # Add FAISS evidence (semantic matches)
-    if faiss_results and (not graph_results or not graph_has_content):
+        # FAISS: semantic matches not already covered, with graph detail
+        # for the ones that seeded the traversal
+        shown = {r["name"] for r in primary[:TOP_K_RERANK]} | {r["name"] for r in related}
+        seeded = {r["name"]: r for r in graph_results if r.get("seed") == "faiss"}
+        extra = [r for r in faiss_results if r["name"] not in shown][:SEMANTIC_EXTRA]
+        if extra:
+            parts.append("=== SEMANTIC SEARCH RESULTS ===")
+            for r in extra:
+                g = seeded.get(r["name"], r)
+                parts.append(f"[{r['name']}] similarity={r['score']:.3f}")
+                if g.get("conditions"):
+                    parts.append(f"  Treats: {', '.join(g['conditions'][:5])}")
+                if g.get("drugs"):
+                    parts.append(f"  Interacts with: {', '.join(g['drugs'][:5])}")
+                if g.get("side_effects"):
+                    parts.append(f"  Side effects: {', '.join(g['side_effects'][:4])}")
+                if g.get("overview"):
+                    parts.append(f"  {g['overview'][:150]}")
+                parts.append("")
+    elif faiss_results:
+        # ── Global path (no graph results): unchanged ──
         parts.append("=== SEMANTIC SEARCH RESULTS ===")
         for r in faiss_results[:TOP_K_RERANK]:
             parts.append(f"[{r['name']}] similarity={r['score']:.3f}")
@@ -528,8 +608,6 @@ def fuse_evidence(state: AgentState) -> AgentState:
                 parts.append(f"  {r['overview'][:200]}")
             parts.append("")
 
-    # If no graph results, promote FAISS results to main evidence
-    if not graph_results and faiss_results:
         parts.append("=== KNOWLEDGE GRAPH EVIDENCE ===")
         for r in faiss_results[:TOP_K_RERANK]:
             parts.append(f"[{r['name']}]")
@@ -540,15 +618,14 @@ def fuse_evidence(state: AgentState) -> AgentState:
             if r.get("overview"):
                 parts.append(f"Overview: {r['overview'][:200]}")
             parts.append("")
-    
+
     if not parts:
         parts.append("No specific evidence found for this query.")
 
     evidence = "\n".join(parts)
 
-
     # Compute confidence based on evidence quality
-    if graph_results and graph_has_content:
+    if primary and graph_has_content:
         confidence = "High"
     elif faiss_results and len(faiss_results) >= 3:
         confidence = "Medium"
@@ -794,6 +871,7 @@ def ask(query: str) -> dict:
         "entities":           None,
         "faiss_results":      None,
         "graph_results":      None,
+        "related_results":    None,
         "community_summaries": None,
         "safety_alerts":      None,
         "evidence":           None,

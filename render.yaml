@@ -1,0 +1,13 @@
+# Render Blueprint: free Docker web service for the SupplementsRx demo.
+services:
+  - type: web
+    name: supplementsrx-ai
+    runtime: docker
+    plan: free
+    branch: deploy-demo
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false        # Render asks for the value when the Blueprint is created

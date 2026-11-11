@@ -1,11 +1,13 @@
 """
 graph_backend.py — knowledge-graph access for the Phase 4 LangGraph pipeline.
 
-Two interchangeable backends expose the same two lookups used by
-phase4_langgraph.py:
+Two interchangeable backends expose the lookups used by phase4_langgraph.py:
 
-  local_lookup(name)       -> 2-hop neighbourhood of up to 3 matching Supplements
-  community_summary(cid)   -> conditions/members summary for a Louvain community
+  local_lookup(name)         -> 1-hop neighbourhood of up to 3 fuzzy-matched Supplements
+  supplements_by_name(names) -> the same neighbourhood for exact names (FAISS seeds)
+  two_hop(name, k)           -> k most similar Supplements (SIMILAR_TO by weight)
+                                with their interactions / side effects / conditions
+  community_summary(cid)     -> conditions/members summary for a Louvain community
 
 Neo4jGraphBackend runs the original Cypher. InMemoryGraphBackend reproduces
 those queries in Python from Knowledge_Graph/graph.json + neo4j_communities.json,
@@ -79,6 +81,48 @@ COMMUNITY_QUERY = """
 LOCAL_FIELDS = ("name", "overview", "pregnancy", "scientific", "conditions",
                 "drugs", "side_effects", "classes", "similar")
 
+# Same 1-hop neighbourhood as LOCAL_QUERY, for exact supplement names
+# (used to seed the traversal from FAISS hits).
+BY_NAME_QUERY = """
+                UNWIND $names AS n
+                MATCH (s:Supplement {name: n})
+                OPTIONAL MATCH (s)-[:TREATS]->(c:Condition)
+                OPTIONAL MATCH (s)-[:INTERACTS_WITH]->(d:Drug)
+                OPTIONAL MATCH (s)-[:HAS_SIDE_EFFECT]->(se:SideEffect)
+                OPTIONAL MATCH (s)-[:BELONGS_TO_CLASS]->(sc:SupplementClass)
+                OPTIONAL MATCH (s)-[:SIMILAR_TO]->(s2:Supplement)
+                RETURN s.name                               AS name,
+                       s.overview                           AS overview,
+                       s.pregnancy                          AS pregnancy,
+                       s.scientific                         AS scientific,
+                       collect(DISTINCT c.name)[0..8]  AS conditions,
+                       collect(DISTINCT d.name)[0..8]  AS drugs,
+                       collect(DISTINCT se.name)[0..5] AS side_effects,
+                       collect(DISTINCT sc.name)[0..3] AS classes,
+                       collect(DISTINCT s2.name)[0..5] AS similar
+            """
+
+# Second hop: supplement -[SIMILAR_TO]-> most similar supplements (by edge
+# weight) -> their drug interactions, side effects and conditions.
+TWO_HOP_QUERY = """
+                MATCH (s:Supplement {name: $name})-[r:SIMILAR_TO]->(s2:Supplement)
+                WITH s2, r ORDER BY r.weight DESC, s2.name ASC
+                LIMIT $k
+                OPTIONAL MATCH (s2)-[:INTERACTS_WITH]->(d:Drug)
+                OPTIONAL MATCH (s2)-[:HAS_SIDE_EFFECT]->(se:SideEffect)
+                OPTIONAL MATCH (s2)-[:TREATS]->(c:Condition)
+                RETURN s2.name                          AS name,
+                       r.weight                         AS weight,
+                       r.shared_conditions              AS shared_conditions,
+                       collect(DISTINCT d.name)[0..5]   AS drugs,
+                       collect(DISTINCT se.name)[0..3]  AS side_effects,
+                       collect(DISTINCT c.name)[0..3]   AS conditions
+                ORDER BY weight DESC, name ASC
+            """
+TWO_HOP_MAX_K = 5
+TWO_HOP_FIELDS = ("name", "weight", "shared_conditions", "drugs",
+                  "side_effects", "conditions")
+
 
 #═══════════════════════════════════════════════════════════════
 #  NEO4J BACKEND
@@ -94,6 +138,22 @@ class Neo4jGraphBackend:
         with self.driver.session() as session:
             return [{k: r[k] for k in LOCAL_FIELDS}
                     for r in session.run(LOCAL_QUERY, name=name)]
+
+    def supplements_by_name(self, names: List[str]) -> List[dict]:
+        if not names:
+            return []
+        with self.driver.session() as session:
+            rows = {r["name"]: {k: r[k] for k in LOCAL_FIELDS}
+                    for r in session.run(BY_NAME_QUERY, names=list(names))}
+        return [rows[n] for n in dict.fromkeys(names) if n in rows]
+
+    def two_hop(self, name: str, k: int = 3) -> List[dict]:
+        k = max(0, min(int(k), TWO_HOP_MAX_K))
+        if not k:
+            return []
+        with self.driver.session() as session:
+            return [{f: r[f] for f in TWO_HOP_FIELDS}
+                    for r in session.run(TWO_HOP_QUERY, name=name, k=k)]
 
     def community_summary(self, cid) -> Optional[dict]:
         with self.driver.session() as session:
@@ -131,7 +191,7 @@ def _cypher_size(s: str) -> int:
 
 class InMemoryGraphBackend:
     """
-    Pure-Python equivalent of the two Cypher queries.
+    Pure-Python equivalent of the Cypher queries above.
 
     Semantics reproduced from the Neo4j load (migrate_to_neo4j.py +
     load_communities_to_aura.py):
@@ -179,6 +239,7 @@ class InMemoryGraphBackend:
             s: tuple([] for _ in _NEIGHBOUR_SPECS) for s in supp_order
         }
         seen = set()
+        similar_w: Dict[str, List[Tuple[float, str, str]]] = {}
         for edge in data.get("edges", []):
             src, tgt = edge.get("source", ""), edge.get("target", "")
             if src not in labels or tgt not in labels:
@@ -194,7 +255,20 @@ class InMemoryGraphBackend:
             i = spec_index.get((rel, labels[tgt]))
             if i is not None:
                 full[src][i].append(canon[tgt])
+            if rel == "SIMILAR_TO" and labels[tgt] == "Supplement":
+                # relationship properties as migrate_to_neo4j.py stores them
+                sc = edge.get("shared_conditions", [])
+                sc = ", ".join(sc) if isinstance(sc, list) else str(sc)
+                similar_w.setdefault(src, []).append(
+                    (float(edge.get("weight", 1.0)), canon[tgt], sc))
         del data, seen
+
+        # Top SIMILAR_TO neighbours by weight (ORDER BY r.weight DESC, s2.name ASC)
+        self._similar_top: Dict[str, Tuple[Tuple[float, str, str], ...]] = {
+            s: tuple(sorted(lst, key=lambda t: (-t[0], t[1]))[:TWO_HOP_MAX_K])
+            for s, lst in similar_w.items()
+        }
+        del similar_w
 
         # Precompute community summaries before trimming neighbour lists.
         # Rows of MATCH (s {louvain_community})-[:TREATS]->(c:Condition) in
@@ -250,14 +324,31 @@ class InMemoryGraphBackend:
                 matches.append((rank, ssize, pos, sname))
         matches.sort()
 
+        return [self._record(sname) for _, _, _, sname in matches[:3]]
+
+    def _record(self, sname: str) -> dict:
+        overview, pregnancy, scientific, conds, drugs, ses, classes, similar = self._records[sname]
+        return {
+            "name": sname, "overview": overview, "pregnancy": pregnancy,
+            "scientific": scientific, "conditions": list(conds),
+            "drugs": list(drugs), "side_effects": list(ses),
+            "classes": list(classes), "similar": list(similar),
+        }
+
+    # ── exact-name 1-hop lookup (FAISS seeds) ─────────────────
+    def supplements_by_name(self, names: List[str]) -> List[dict]:
+        return [self._record(n) for n in dict.fromkeys(names or []) if n in self._records]
+
+    # ── second hop via SIMILAR_TO ─────────────────────────────
+    def two_hop(self, name: str, k: int = 3) -> List[dict]:
+        k = max(0, min(int(k), TWO_HOP_MAX_K))
         out = []
-        for _, _, _, sname in matches[:3]:
-            overview, pregnancy, scientific, conds, drugs, ses, classes, similar = self._records[sname]
+        for weight, s2, shared in self._similar_top.get(name, ())[:k]:
+            _, _, _, conds, drugs, ses, _, _ = self._records[s2]
             out.append({
-                "name": sname, "overview": overview, "pregnancy": pregnancy,
-                "scientific": scientific, "conditions": list(conds),
-                "drugs": list(drugs), "side_effects": list(ses),
-                "classes": list(classes), "similar": list(similar),
+                "name": s2, "weight": weight, "shared_conditions": shared,
+                "drugs": list(drugs[:5]), "side_effects": list(ses[:3]),
+                "conditions": list(conds[:3]),
             })
         return out
 

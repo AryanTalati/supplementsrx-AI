@@ -36,7 +36,9 @@ User Query
     ↓
 Intent Classifier (GPT-4o-mini) → Global / Local / Out-of-Scope
     ↓
-LOCAL  → Entity Extraction → FAISS Search + Neo4j 2-hop Traversal
+LOCAL  → Entity Extraction + FAISS Search → graph seeds (named entities + top vector hits)
+         hop 1: conditions, drug interactions, side effects, classes, similar supplements
+         hop 2: most similar supplements (SIMILAR_TO by weight) → their interactions / side effects
 GLOBAL → Community Summary Retrieval (Louvain clusters)
 OOS    → Graceful warm decline
     ↓
@@ -84,6 +86,11 @@ FastAPI → Chat UI
 ## Evaluation Results (RAGAS)
 
 Evaluated on 130-question SupplementRx-Bench dataset across 5 categories.
+
+> These scores were measured on the original pipeline, where the local path used
+> only the extracted entities and a 1-hop graph lookup. The current local path also
+> seeds the graph from FAISS hits and adds a second hop, so re-run `run_eval.py` /
+> `evaluate.py` for up-to-date numbers.
 
 | Metric | Score |
 |--------|-------|
@@ -196,14 +203,21 @@ uvicorn main:app --reload --port 8000
 ### 6. Open browser
 Navigate to `http://127.0.0.1:8000` (health check: `/health`)
 
-### Docker / Hugging Face Spaces
-The `Dockerfile` serves the app on port 7860 as a non-root user, which is the layout
-Hugging Face Spaces (Docker SDK) expects; the front matter at the top of this README
-configures the Space. Set `OPENAI_API_KEY` as a Space secret.
+### Docker
+The `Dockerfile` serves the app as a non-root user on `$PORT` (default 7860).
 ```bash
 docker build -t supplementsrx .
 docker run -p 7860:7860 -e OPENAI_API_KEY=sk-... supplementsrx
 ```
+
+**Render (free tier):** `render.yaml` defines a free Docker web service with a `/health`
+check. In Render choose *New → Blueprint*, pick this repo and branch, and enter
+`OPENAI_API_KEY` when prompted. Free instances sleep after 15 minutes idle; the first
+request after that takes about a minute.
+
+**Hugging Face Spaces:** the front matter at the top of this README configures a Docker
+Space, and `deploy/push_to_hf_space.sh` pushes the runtime files (large files via git
+LFS). Docker Spaces need a PRO account. Set `OPENAI_API_KEY` as a Space secret.
 
 ---
 
@@ -242,7 +256,7 @@ python evaluate.py
 | Component | Technology |
 |-----------|-----------|
 | Data Collection | Selenium, BeautifulSoup, Requests |
-| Knowledge Graph | Neo4j AuraDB (cloud) |
+| Knowledge Graph | Neo4j (optional) or in-memory graph built from `graph.json` |
 | Graph Clustering | Louvain algorithm |
 | Embeddings | OpenAI text-embedding-3-small |
 | Vector Search | FAISS IndexFlatIP |
